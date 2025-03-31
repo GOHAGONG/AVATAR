@@ -1,17 +1,22 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
-    public float moveSpeed = 5f;
-    public float jumpForce = 2f;
+    public float moveSpeed = 0f;
+    public float jumpForce = 0f;
 
     [Header("Components")]
     private CharacterController controller;
     private Vector3 velocity;
     public bool isGrounded;
-    public bool isCrouching;
+    public bool isCrouching = false;
     public bool isWalking;
+    public bool isRunning;
+    public bool isThrowing = false;
+    public bool isLying = false;
+    public bool isJumping = false;
 
     [Header("Ground Check")]
     public Transform groundCheck;
@@ -41,8 +46,20 @@ public class PlayerMovement : MonoBehaviour
         // 이동 적용
         controller.Move(move * moveSpeed * Time.deltaTime);
 
+
         // isWalking 판단
         isWalking = move.magnitude > 0.1f;
+
+        // isRunning 판단
+        if (Input.GetButtonDown("Run") && isWalking)
+        {
+            isRunning = true;
+        }
+
+        if (Input.GetButtonUp("Run") && isWalking)
+        {
+            isRunning = false;
+        }
 
         // Animator 연동
         if (animator != null)
@@ -50,14 +67,23 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("isWalking", isWalking);
             animator.SetBool("isCrouching", isCrouching);
             animator.SetBool("isGrounded", isGrounded);
+            animator.SetBool("isRunning", isRunning);
         }
 
         // Jump
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump") && isGrounded && !isJumping)
         {
+            isJumping = true;
+            StartCoroutine(WaitAndJump());
+        }
+
+        IEnumerator WaitAndJump()
+        {
+            animator.SetTrigger("Jump Start");
+            yield return new WaitForSeconds(0.8f);
             velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
             Debug.Log("Jump action triggered!");
-            animator.SetTrigger("Jump");
+            isJumping = false;
         }
 
         // Gravity 적용
@@ -65,12 +91,30 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
 
         // Crouch - Left Ctrl
+        // if (Input.GetButtonDown("Crouch") && !isCrouching)
+        // {
+        //     isCrouching = true;
+        //     //animator.Play("Pick Fruit_Start");
+        //     animator.SetTrigger("Crouch Start");
+        //     // animator.ResetTrigger("Crouch Start");
+        // }
+        // if (Input.GetButtonUp("Crouch") && isCrouching)
+        // {
+        //     isCrouching = false;
+        //     // animator.Play("Pick Fruit_End");
+        //     animator.SetTrigger("Crouch End");
+        //     // animator.ResetTrigger("Crouch End");
+        // }
+
         if (Input.GetButtonDown("Crouch"))
         {
+            animator.SetTrigger("Crouch Start");
             isCrouching = true;
         }
-        else if (Input.GetButtonUp("Crouch"))
+
+        if (Input.GetButtonUp("Crouch") && isCrouching) 
         {
+            animator.SetTrigger("Crouch End");
             isCrouching = false;
         }
 
@@ -78,7 +122,14 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButtonDown("Throw"))
         {
             Debug.Log("Throw action triggered!");
-            animator.SetTrigger("Throw");
+            animator.SetTrigger("Throw Start");
+            isThrowing = true;
+        }
+
+        if (Input.GetButtonUp("Throw") && isThrowing) 
+        {
+            animator.SetTrigger("Throw End");
+            isThrowing = false;
         }
 
         // Stomp - Q key
@@ -86,6 +137,19 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log("Stomp action triggered!");
             animator.SetTrigger("Stomp");
+        }
+
+        if (Input.GetButtonDown("Lying Down"))
+        {
+            Debug.Log("Lying action triggered!");
+            animator.SetTrigger("Lying Start");
+            isLying = true;
+        }
+
+        if (Input.GetButtonUp("Lying Down") && isLying) 
+        {
+            animator.SetTrigger("Lying End");
+            isLying = false;
         }
     }
 }
