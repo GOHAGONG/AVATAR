@@ -17,7 +17,11 @@ MonoBehaviour:
   SkipPromptForVersion: 
   StereoRenderingMode: 1
   InitializationType: 1
+<<<<<<< Updated upstream
   EditorAppKey: application.generated.unity.avatarforclone.1447371648.exe
+=======
+  EditorAppKey: application.generated.unity.avatarforclone.475938368.exe
+>>>>>>> Stashed changes
   ActionManifestFileRelativeFilePath: 
   MirrorView: 2
   HasCopiedDefaults: 0
