@@ -12,11 +12,12 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     public bool isGrounded;
     public bool isCrouching = false;
-    public bool isWalking;
-    public bool isRunning;
+    public bool isWalking = false;
+    public bool isRunning = false;
     public bool isThrowing = false;
     public bool isLying = false;
     public bool isJumping = false;
+    public bool isCrawling = false;
 
     [Header("Ground Check")]
     public Transform groundCheck;
@@ -68,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("isCrouching", isCrouching);
             animator.SetBool("isGrounded", isGrounded);
             animator.SetBool("isRunning", isRunning);
+            animator.SetBool("isCrawling", isCrawling);
         }
 
         // Jump
@@ -89,22 +91,6 @@ public class PlayerMovement : MonoBehaviour
         // Gravity 적용
         velocity.y += Physics.gravity.y * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
-
-        // Crouch - Left Ctrl
-        // if (Input.GetButtonDown("Crouch") && !isCrouching)
-        // {
-        //     isCrouching = true;
-        //     //animator.Play("Pick Fruit_Start");
-        //     animator.SetTrigger("Crouch Start");
-        //     // animator.ResetTrigger("Crouch Start");
-        // }
-        // if (Input.GetButtonUp("Crouch") && isCrouching)
-        // {
-        //     isCrouching = false;
-        //     // animator.Play("Pick Fruit_End");
-        //     animator.SetTrigger("Crouch End");
-        //     // animator.ResetTrigger("Crouch End");
-        // }
 
         if (Input.GetButtonDown("Crouch"))
         {
@@ -150,6 +136,19 @@ public class PlayerMovement : MonoBehaviour
         {
             animator.SetTrigger("Lying End");
             isLying = false;
+        }
+
+        if (Input.GetButtonDown("Crawl"))
+        {
+            Debug.Log("Crawl action triggered!");
+            animator.SetTrigger("Crawl Start");
+            isCrawling = true;
+        }
+
+        if (Input.GetButtonUp("Crawl") && isCrawling) 
+        {
+            animator.SetTrigger("Crawl End");
+            isCrawling = false;
         }
     }
 }
