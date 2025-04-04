@@ -40,9 +40,10 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = -2f;
 
         // Movement input
-        float x = Input.GetAxis("Horizontal");
+        //float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
-        Vector3 move = transform.right * x + transform.forward * z;
+        //Vector3 move = transform.right * x + transform.forward * z;
+        Vector3 move = transform.forward * z;
 
         // 이동 적용
         controller.Move(move * moveSpeed * Time.deltaTime);
