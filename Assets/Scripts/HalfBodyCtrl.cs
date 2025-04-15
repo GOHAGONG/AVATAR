@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using Valve.VR;
 
-public class PMCtrl : MonoBehaviour
+public class HalfBodyCtrl : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 0f;
@@ -41,6 +41,7 @@ public class PMCtrl : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        
     }
 
     void Update()
