@@ -90,8 +90,8 @@ public class PMCtrl : MonoBehaviour
             // 이동 적용
             controller.Move(move * moveSpeed * Time.deltaTime);
             
-            isWalking = (activeInput.y > 0.2f && activeInput.y < 0.8f);
-            isRunning = (activeInput.y >= 0.5f && activeInput.y < 0.8f);
+            isWalking = (activeInput.y > 0.2f);
+            isRunning = (activeInput.y >= 0.6f);
         }
         else
         {
@@ -113,30 +113,32 @@ public class PMCtrl : MonoBehaviour
         bool leftPressed = jumpAction.GetStateDown(leftInputSource);
         bool rightPressed = jumpAction.GetStateDown(rightInputSource);
 
-        if (!isJumping && (leftPressed || rightPressed) && isGrounded)
+        
+
+        if (!isJumping && rightPressed)
         {
             isJumping = true;
             animator.SetTrigger("Jump Prepare");
             Debug.Log("Jump preparation started");
-            leftReleasedFlag = false;
-            rightReleasedFlag = false;
+            if (activeHand == rightInputSource)
+                activeHand = leftInputSource;
         }
 
-        if (isJumping)
-        {
-            if (jumpAction.GetStateUp(leftInputSource))
-                leftReleasedFlag = true;
-            if (jumpAction.GetStateUp(rightInputSource))
-                rightReleasedFlag = true;
-            
-            if (leftReleasedFlag || rightReleasedFlag)
-            {
-                animator.SetTrigger("Jump Execute");
-                velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
-                Debug.Log("Jump executed!");
-                isJumping = false;
-            }
+        if(isJumping && activeInput.y > 0.2f){
+            animator.SetTrigger("Jump Execute");
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
+            Debug.Log("Jump executed!");
+            isJumping = false;
         }
+
+        if ((jumpAction.GetStateUp(leftInputSource) && isJumping) ||
+            (jumpAction.GetStateUp(rightInputSource) && isJumping))
+        {
+            animator.SetTrigger("Jump Cancel");
+            isJumping = false;
+        }
+
+
 
         // Gravity 적용
         //velocity.y += Physics.gravity.y * Time.deltaTime;
