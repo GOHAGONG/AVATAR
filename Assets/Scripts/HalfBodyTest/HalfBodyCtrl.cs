@@ -22,9 +22,9 @@ public class HalfBodyCtrl : MonoBehaviour
     public bool isJumping = false;
     public bool isCrawling = false;
     public bool filpLeft = false;
-    public float crouchThreshold = 0.2f;
+    public float crouchThreshold;
     private bool crouchTriggered = false;
-    public float jumpThreshold = 1.5f;
+    public float jumpThreshold;
 
     [Header("Ground Check")]
     public Transform groundCheck;
@@ -73,6 +73,20 @@ public class HalfBodyCtrl : MonoBehaviour
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
         
+        // 속도 계산
+        Vector3 leftVel = leftHandPose.GetVelocity();
+        Vector3 rightVel = rightHandPose.GetVelocity();
+
+        float leftForward = Vector3.Dot(transform.forward, leftVel);
+        float rightForward = Vector3.Dot(transform.forward, rightVel);
+
+        float avgSpeed = (Mathf.Abs(leftForward) + Mathf.Abs(rightForward)) / 2f;
+
+        // 손 교차 판단
+        bool handsAreCrossing = (leftForward > 0.05f && rightForward < -0.05f) ||
+                                (leftForward < -0.05f && rightForward > 0.05f);
+        
+        // 높이 계산
         float leftY = leftHandPose.transform.position.y;
         float rightY = rightHandPose.transform.position.y;
 
@@ -122,18 +136,6 @@ public class HalfBodyCtrl : MonoBehaviour
             // }
 
             // 속도 기반
-            // 속도 계산
-            Vector3 leftVel = leftHandPose.GetVelocity();
-            Vector3 rightVel = rightHandPose.GetVelocity();
-
-            float leftForward = Vector3.Dot(transform.forward, leftVel);
-            float rightForward = Vector3.Dot(transform.forward, rightVel);
-
-            float avgSpeed = (Mathf.Abs(leftForward) + Mathf.Abs(rightForward)) / 2f;
-
-            // 손 교차 판단
-            bool handsAreCrossing = (leftForward > 0.05f && rightForward < -0.05f) ||
-                                    (leftForward < -0.05f && rightForward > 0.05f);
 
             // 타이머 업데이트
             if (handsAreCrossing && avgSpeed > 0.05f)
@@ -218,6 +220,43 @@ public class HalfBodyCtrl : MonoBehaviour
 
         else if (currentTestName == currentTest.Crawl)
         {
+            Debug.Log("Height :"+leftY);
+            if (!isCrawling && leftY > 1.0f && leftY < 1.5f && rightY > 1.4f && rightY < 1.5f)
+            {
+                Debug.Log("Crawl Triggered");
+                animator.SetTrigger("Crawl Start");
+                isCrawling = true;
+            }
+
+            // 타이머 업데이트
+            if (handsAreCrossing && avgSpeed > 0.05f)
+            {
+                // // 조건 만족했을 때만 타이머 리셋
+                // if (avgSpeed >= 0.4f)
+                // {
+                    // runTimer = runHoldTime;
+                // }
+                // else
+                // {
+                    walkTimer = walkHoldTime;
+                // }
+            }
+
+            // 타이머 감소
+            if(walkTimer > 0)
+                walkTimer -= Time.deltaTime;
+            // if(runTimer > 0)
+                // runTimer -= Time.deltaTime;
+
+            // 상태 판단
+            // isRunning = runTimer > 0f;
+            isWalking = (isCrawling && walkTimer > 0f);
+
+            if (isCrawling && (leftY < 0.5f && rightY < 0.5f) )
+            {
+                animator.SetTrigger("Crawl End");
+                isCrawling = false;
+            }
 
         }
         // if (!isCrawling &&crouchAction.GetStateDown(leftInputSource))
@@ -244,31 +283,6 @@ public class HalfBodyCtrl : MonoBehaviour
         //     filpLeft = false;
         // }
 
-        // if (!isCrouching && crawlAction.GetStateDown(leftInputSource))
-        // {
-        //     Debug.Log("Crawl Left Triggered");
-        //     animator.SetTrigger("Crawl Start");
-        //     isCrawling = true;
-
-        //     if (activeHand == leftInputSource)
-        //         activeHand = rightInputSource;
-        // }
-        // if (!isCrouching && crawlAction.GetStateDown(rightInputSource))
-        // {
-        //     Debug.Log("Crawl Right Triggered");
-        //     animator.SetTrigger("Crawl Start");
-        //     isCrawling = true;
-
-        //     if (activeHand == rightInputSource)
-        //         activeHand = leftInputSource;
-        // }
-
-        // if ((crawlAction.GetStateUp(leftInputSource) && isCrawling) ||
-        //     (crawlAction.GetStateUp(rightInputSource) && isCrawling))
-        // {
-        //     animator.SetTrigger("Crawl End");
-        //     isCrawling = false;
-        // }
 
         // Animator 연동
         if (animator != null)
