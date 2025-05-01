@@ -18,7 +18,7 @@ public class HMDRot : MonoBehaviour
         lastYaw = initialYaw;
 
         // 초기 위치 세팅
-        hmdCameraRig.position = playerHead.position + cameraOffset;
+        //hmdCameraRig.position = playerHead.position + cameraOffset;
     }
 
     void Update()
@@ -31,7 +31,7 @@ public class HMDRot : MonoBehaviour
         playerBody.Rotate(0, adjustedYaw, 0);
 
         // hmdCamera 위치를 playerBody 기준으로 따라가게 함
-        hmdCameraRig.position = playerHead.position + cameraOffset;
+        //hmdCameraRig.position = playerHead.position + cameraOffset;
 
         // 보정: 회전 중첩 방지
         hmdCamera.localRotation = Quaternion.Euler(

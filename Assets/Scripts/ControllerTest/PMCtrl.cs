@@ -18,8 +18,8 @@ public class PMCtrl : MonoBehaviour
     public bool isJumping = false;
     public bool isCrawling = false;
     public bool filpLeft = false;
-    private bool leftReleasedFlag = false;
-    private bool rightReleasedFlag = false;
+    // private bool leftReleasedFlag = false;
+    // private bool rightReleasedFlag = false;
 
     [Header("Ground Check")]
     public Transform groundCheck;

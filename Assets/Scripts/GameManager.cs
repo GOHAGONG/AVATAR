@@ -9,11 +9,16 @@ public class GameManager : MonoBehaviour
     public GameObject Move;
     public GameObject PickUp;
     public GameObject Crawl;
-    public GameObject LieDown;
     public GameObject Jump;
-    public GameObject Throw;
-    public GameObject Stomp;
     public GameObject Outro;
+
+    public void Start()
+    {
+        // // if Full Body
+        // tracker 켜야되나?
+        // // else
+        // tracker 꺼야되나?
+    }
 
     public void NextStage()
     {
@@ -31,10 +36,7 @@ public class GameManager : MonoBehaviour
                 Move.SetActive(true);
                 PickUp.SetActive(false);
                 Crawl.SetActive(false);
-                LieDown.SetActive(false);
                 Jump.SetActive(false);
-                Throw.SetActive(false);
-                Stomp.SetActive(false);
                 break;
 
             case 1:
@@ -42,10 +44,7 @@ public class GameManager : MonoBehaviour
                 Move.SetActive(false);
                 PickUp.SetActive(true);
                 Crawl.SetActive(false);
-                LieDown.SetActive(false);
                 Jump.SetActive(false);
-                Throw.SetActive(false);
-                Stomp.SetActive(false);
                 break;
             
             case 2:
@@ -53,10 +52,7 @@ public class GameManager : MonoBehaviour
                 Move.SetActive(false);
                 PickUp.SetActive(false);
                 Crawl.SetActive(true);
-                LieDown.SetActive(false);
                 Jump.SetActive(false);
-                Throw.SetActive(false);
-                Stomp.SetActive(false);
                 break;
 
             case 3:
@@ -64,43 +60,7 @@ public class GameManager : MonoBehaviour
                 Move.SetActive(false);
                 PickUp.SetActive(false);
                 Crawl.SetActive(false);
-                LieDown.SetActive(true);
-                Jump.SetActive(false);
-                Throw.SetActive(false);
-                Stomp.SetActive(false);
-                break;
-
-            case 4:
-                StartBtn.SetActive(false);
-                Move.SetActive(false);
-                PickUp.SetActive(false);
-                Crawl.SetActive(false);
-                LieDown.SetActive(false);
                 Jump.SetActive(true);
-                Throw.SetActive(false);
-                Stomp.SetActive(false);
-                break;
-
-            case 5:
-                StartBtn.SetActive(false);
-                Move.SetActive(false);
-                PickUp.SetActive(false);
-                Crawl.SetActive(false);
-                LieDown.SetActive(false);
-                Jump.SetActive(false);
-                Throw.SetActive(true);
-                Stomp.SetActive(false);
-                break;
-
-            case 6:
-                StartBtn.SetActive(false);
-                Move.SetActive(false);
-                PickUp.SetActive(false);
-                Crawl.SetActive(false);
-                LieDown.SetActive(false);
-                Jump.SetActive(false);
-                Throw.SetActive(false);
-                Stomp.SetActive(true);
                 break;
 
             default:
@@ -108,10 +68,7 @@ public class GameManager : MonoBehaviour
                 Move.SetActive(false);
                 PickUp.SetActive(false);
                 Crawl.SetActive(false);
-                LieDown.SetActive(false);
                 Jump.SetActive(false);
-                Throw.SetActive(false);
-                Stomp.SetActive(false);
                 Debug.Log("실험 끝");
                 break;
         }

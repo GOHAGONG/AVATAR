@@ -2,10 +2,9 @@ using UnityEngine;
 using System.Collections;
 using Valve.VR;
 
-public class HalfBodyCtrl : MonoBehaviour
+public class FullBodyCtrl : MonoBehaviour
 {
     [Header("Movement")]
-    // fullBody에서 사용하게 될 수도 
     public float moveSpeed = 0f;
     public float jumpForce = 0f;
 
@@ -22,14 +21,10 @@ public class HalfBodyCtrl : MonoBehaviour
     public float crouchThreshold;
     private bool crouchTriggered = false;
     public float jumpThreshold;
-    public float jumpExitThreshold;
     public float crawlThreshold1;
     public float crawlThreshold2;
-    public float crawlThreshold3;
-    public float crawlThreshold4;
-    public float walkThreshold;
-    public bool isWalkThreshold;
-    public float runThreshold;
+    // public float crawlThreshold3;
+    // public float crawlThreshold4;
 
     [Header("Ground Check")]
     public Transform groundCheck;
@@ -111,7 +106,7 @@ public class HalfBodyCtrl : MonoBehaviour
             isJumping = true;
             animator.SetTrigger("Jump Prepare");
         }
-        if(isJumping && leftY < jumpExitThreshold && rightY < jumpExitThreshold){
+        if(isJumping && leftY < jumpThreshold && rightY < jumpThreshold){
             animator.SetTrigger("Jump Execute");
             velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
             Debug.Log("Jump executed!");
@@ -208,77 +203,34 @@ public class HalfBodyCtrl : MonoBehaviour
             Debug.Log("Crouch End");
         }
 
-        Debug.Log("leftY: " + leftY);
-
-        if (leftY < walkThreshold && rightY < walkThreshold)
-            isWalkThreshold = true;
-        else isWalkThreshold = false;
-
-        // if(!isCrawling && !isCrouching && !isJumping && isWalkThreshold)
-        // { 
-        //     // 타이머 업데이트
-        //     if (handsAreCrossing && avgSpeed > 0.05f)
-        //     {
-        //         // 조건 만족했을 때만 타이머 리셋
-        //         if (avgSpeed >= 0.7f)
-        //         {
-        //             runTimer = runHoldTime;
-        //         }
-        //         else
-        //         {
-        //             walkTimer = walkHoldTime;
-        //         }
-        //     }
-
-        //     // 타이머 감소
-        //     if(walkTimer > 0)
-        //         walkTimer -= Time.deltaTime;
-        //     if(runTimer > 0)
-        //         runTimer -= Time.deltaTime;
-
-        //     // 상태 판단
-        //     isRunning = runTimer > 0f;
-        //     isWalking = walkTimer > 0f;
-
-        //     // 디버깅 (선택사항)
-        //     //Debug.Log($"[Move] Cross: {handsAreCrossing}, Speed: {avgSpeed:F2}, WalkT: {walkTimer:F2}, RunT: {runTimer:F2}");
-        // }
         if(!isCrawling && !isCrouching && !isJumping){
-            if(isWalkThreshold)
-            { 
-                // 타이머 업데이트
-                if (handsAreCrossing && avgSpeed > 0.05f)
+            // 타이머 업데이트
+            if (handsAreCrossing && avgSpeed > 0.05f)
+            {
+                // 조건 만족했을 때만 타이머 리셋
+                if (avgSpeed >= 0.7f)
                 {
-                   // 조건 만족했을 때만 타이머 리셋
-                   if (avgSpeed >= runThreshold)
-                   {
-                        runTimer = runHoldTime;
-                   }
-                    else
-                   {
-                        walkTimer = walkHoldTime;
-                   }
+                    runTimer = runHoldTime;
                 }
-
-                // 타이머 감소
-                if(walkTimer > 0)
-                    walkTimer -= Time.deltaTime;
-                if(runTimer > 0)
-                    runTimer -= Time.deltaTime;
-
-                // 상태 판단
-                isRunning = runTimer > 0f;
-                isWalking = walkTimer > 0f;
-
-                // 디버깅 (선택사항)
-                //Debug.Log($"[Move] Cross: {handsAreCrossing}, Speed: {avgSpeed:F2}, WalkT: {walkTimer:F2}, RunT: {runTimer:F2}");
+                else
+                {
+                    walkTimer = walkHoldTime;
+                }
             }
-            else{
-                isRunning = false;
-                isWalking = false;
-            }
+
+            // 타이머 감소
+            if(walkTimer > 0)
+                walkTimer -= Time.deltaTime;
+            if(runTimer > 0)
+                runTimer -= Time.deltaTime;
+
+            // 상태 판단
+            isRunning = runTimer > 0f;
+            isWalking = walkTimer > 0f;
+
+            // 디버깅 (선택사항)
+            //Debug.Log($"[Move] Cross: {handsAreCrossing}, Speed: {avgSpeed:F2}, WalkT: {walkTimer:F2}, RunT: {runTimer:F2}");
         }
-        
 
         // Animator 연동
         if (animator != null)
