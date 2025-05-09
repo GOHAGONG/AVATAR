@@ -14,10 +14,7 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
-        // // if Full Body
-        // tracker 켜야되나?
-        // // else
-        // tracker 꺼야되나?
+        Debug.Log("GameManager Start");
     }
 
     public void NextStage()

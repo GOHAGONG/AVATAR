@@ -1,6 +1,7 @@
 ﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 using UnityEngine;
 using System.Collections;
+using Valve.VR;
 
 namespace Valve.VR.Extras
 {
@@ -26,9 +27,17 @@ namespace Valve.VR.Extras
 
         Transform previousContact = null;
 
+        // 컨트롤러
+        public Transform rightController;
 
         private void Start()
         {
+            StartCoroutine(DelayedInitialize());
+        }
+        private IEnumerator DelayedInitialize()
+        {
+            yield return new WaitForSeconds(0.1f); // SteamVR 시스템 초기화 대기
+
             if (pose == null)
                 pose = this.GetComponent<SteamVR_Behaviour_Pose>();
             if (pose == null)
@@ -153,8 +162,42 @@ namespace Valve.VR.Extras
                 pointer.GetComponent<MeshRenderer>().material.color = color;
             }
             pointer.transform.localPosition = new Vector3(0f, 0f, dist / 2f);
+
+            // steam vr 인식 되면 다시 ray 초기화 
+            if (rightController) Reinitialize();
         }
+        
+        void OnEnable()
+        {
+            var laser = GetComponent<SteamVR_LaserPointer>();
+            laser.PointerClick += OnPointerClick;
+        }
+
+        private void OnPointerClick(object sender, PointerEventArgs e)
+        {
+            Debug.Log("Clicked on: " + e.target.name);
+            Debug.Log($"Clicked {e.target.name} with {e.fromInputSource}");
+
+            // UI Button 처리
+            var button = e.target.GetComponent<UnityEngine.UI.Button>();
+            if (button != null)
+            {
+                button.onClick.Invoke();
+            }
+        }
+
+        public void Reinitialize()
+        {
+            if (pointer != null)
+                Destroy(pointer);
+
+            StartCoroutine(DelayedInitialize()); // 이전에 만들었던 지연 초기화 로직
+        }
+
+
     }
+
+
 
     public struct PointerEventArgs
     {

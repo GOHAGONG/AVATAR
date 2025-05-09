@@ -49,6 +49,14 @@ namespace Valve.VR
             }
         }
         
+        public virtual SteamVR_Action_Boolean Exhausted
+        {
+            get
+            {
+                return SteamVR_Actions.avatar_Exhausted;
+            }
+        }
+        
         public virtual SteamVR_Action_Vibration Haptic
         {
             get

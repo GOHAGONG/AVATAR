@@ -9,8 +9,8 @@ public class AvatarIKController : MonoBehaviour
     public Transform rightControllerTransform;
     public Transform leftTrackerTransform;
     public Transform rightTrackerTransform;
-    public Transform leftElbowHintPosition;
-    public Transform rightElbowHintPosition;
+    // public Transform leftElbowHintPosition;
+    // public Transform rightElbowHintPosition;
 
     private Animator animator;
 
@@ -42,17 +42,17 @@ public class AvatarIKController : MonoBehaviour
             // animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 1f);
             // animator.SetIKHintPosition(AvatarIKHint.RightElbow, rightElbowHintPosition.position);
 
-            // // 왼발
-            // animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1);
-            // animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1);
-            // animator.SetIKPosition(AvatarIKGoal.LeftFoot, leftTrackerTransform.position);
-            // animator.SetIKRotation(AvatarIKGoal.LeftFoot, leftTrackerTransform.rotation);
+            // 왼발
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1);
+            animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1);
+            animator.SetIKPosition(AvatarIKGoal.LeftFoot, leftTrackerTransform.position);
+            animator.SetIKRotation(AvatarIKGoal.LeftFoot, leftTrackerTransform.rotation);
 
-            // // 오른발
-            // animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1);
-            // animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1);
-            // animator.SetIKPosition(AvatarIKGoal.RightFoot, rightTrackerTransform.position);
-            // animator.SetIKRotation(AvatarIKGoal.RightFoot, rightTrackerTransform.rotation);
+            // 오른발
+            animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1);
+            animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1);
+            animator.SetIKPosition(AvatarIKGoal.RightFoot, rightTrackerTransform.position);
+            animator.SetIKRotation(AvatarIKGoal.RightFoot, rightTrackerTransform.rotation);
         }
     }
 }

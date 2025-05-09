@@ -99,6 +99,10 @@
       "type": "vector2"
     },
     {
+      "name": "/actions/avatar/in/Exhausted",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/avatar/out/Haptic",
       "type": "vibration"
     }

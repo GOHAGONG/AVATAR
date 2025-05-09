@@ -63,6 +63,8 @@ namespace Valve.VR
         
         private static SteamVR_Action_Vector2 p_avatar_trackpadAction;
         
+        private static SteamVR_Action_Boolean p_avatar_Exhausted;
+        
         private static SteamVR_Action_Vibration p_avatar_Haptic;
         
         public static SteamVR_Action_Boolean default_InteractUI
@@ -249,6 +251,14 @@ namespace Valve.VR
             }
         }
         
+        public static SteamVR_Action_Boolean avatar_Exhausted
+        {
+            get
+            {
+                return SteamVR_Actions.p_avatar_Exhausted.GetCopy<SteamVR_Action_Boolean>();
+            }
+        }
+        
         public static SteamVR_Action_Vibration avatar_Haptic
         {
             get
@@ -283,6 +293,7 @@ namespace Valve.VR
                     SteamVR_Actions.avatar_Crouch,
                     SteamVR_Actions.avatar_Crawl,
                     SteamVR_Actions.avatar_trackpadAction,
+                    SteamVR_Actions.avatar_Exhausted,
                     SteamVR_Actions.avatar_Haptic};
             Valve.VR.SteamVR_Input.actionsIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.default_InteractUI,
@@ -306,7 +317,8 @@ namespace Valve.VR
                     SteamVR_Actions.avatar_Jump,
                     SteamVR_Actions.avatar_Crouch,
                     SteamVR_Actions.avatar_Crawl,
-                    SteamVR_Actions.avatar_trackpadAction};
+                    SteamVR_Actions.avatar_trackpadAction,
+                    SteamVR_Actions.avatar_Exhausted};
             Valve.VR.SteamVR_Input.actionsOut = new Valve.VR.ISteamVR_Action_Out[] {
                     SteamVR_Actions.default_Haptic,
                     SteamVR_Actions.avatar_Haptic};
@@ -329,7 +341,8 @@ namespace Valve.VR
                     SteamVR_Actions.buggy_Reset,
                     SteamVR_Actions.avatar_Jump,
                     SteamVR_Actions.avatar_Crouch,
-                    SteamVR_Actions.avatar_Crawl};
+                    SteamVR_Actions.avatar_Crawl,
+                    SteamVR_Actions.avatar_Exhausted};
             Valve.VR.SteamVR_Input.actionsSingle = new Valve.VR.SteamVR_Action_Single[] {
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.buggy_Throttle};
@@ -359,7 +372,8 @@ namespace Valve.VR
                     SteamVR_Actions.avatar_Jump,
                     SteamVR_Actions.avatar_Crouch,
                     SteamVR_Actions.avatar_Crawl,
-                    SteamVR_Actions.avatar_trackpadAction};
+                    SteamVR_Actions.avatar_trackpadAction,
+                    SteamVR_Actions.avatar_Exhausted};
         }
         
         private static void PreInitActions()
@@ -387,6 +401,7 @@ namespace Valve.VR
             SteamVR_Actions.p_avatar_Crouch = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/avatar/in/Crouch")));
             SteamVR_Actions.p_avatar_Crawl = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/avatar/in/Crawl")));
             SteamVR_Actions.p_avatar_trackpadAction = ((SteamVR_Action_Vector2)(SteamVR_Action.Create<SteamVR_Action_Vector2>("/actions/avatar/in/trackpadAction")));
+            SteamVR_Actions.p_avatar_Exhausted = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/avatar/in/Exhausted")));
             SteamVR_Actions.p_avatar_Haptic = ((SteamVR_Action_Vibration)(SteamVR_Action.Create<SteamVR_Action_Vibration>("/actions/avatar/out/Haptic")));
         }
     }
