@@ -1,11 +1,12 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 using Valve.VR;
 
 public class ExhaustCheck : MonoBehaviour
 {
     [Header("Exhaust Count")]
     public int exhaust_count = 0;
+    public List<int> exhaustHistory = new List<int>();
 
     [Header("Components")]
     public bool isExhausted = false;
@@ -40,6 +41,7 @@ public class ExhaustCheck : MonoBehaviour
 
     public void ResetExhaustCount()
     {
+        exhaustHistory.Add(exhaust_count);
         exhaust_count = 0;
         Debug.Log("Exhaust count reset.");
     }
