@@ -83,6 +83,26 @@
       "requirement": "optional"
     },
     {
+      "name": "/actions/avatar/in/Jump",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/avatar/in/Crouch",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/avatar/in/Crawl",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/avatar/in/trackpadAction",
+      "type": "vector2"
+    },
+    {
+      "name": "/actions/avatar/in/Exhausted",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/avatar/out/Haptic",
       "type": "vibration"
     }
