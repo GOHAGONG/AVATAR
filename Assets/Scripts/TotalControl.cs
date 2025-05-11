@@ -2,16 +2,33 @@ using UnityEngine;
 using System.Collections;
 using Valve.VR;
 
-public enum CurrentMethod { Controller, HalfBody, FullBody }
+public enum CurrentMethod { Controller, HalfBody, FullBody, Customize }
+public enum CustomMethod { Controller, HalfBody, FullBody }
 
 public class TotalControl : MonoBehaviour
 {
     [Header("Select Method")]
     [SerializeField]
-    public CurrentMethod WalkMethod;
-    public CurrentMethod CrouchMethod;
-    public CurrentMethod JumpMethod;
-    public CurrentMethod CrawlMethod;
+    public CurrentMethod SelectedMethod = CurrentMethod.Controller;
+
+    [Header("Customize Method")]
+    [SerializeField]
+    public CustomMethod WalkMethod;
+    public CustomMethod CrouchMethod;
+    public CustomMethod JumpMethod;
+    public CustomMethod CrawlMethod;
+
+    private void OnValidate()
+    {
+        if (SelectedMethod != CurrentMethod.Customize)
+        {
+            var method = (CustomMethod)SelectedMethod;
+            WalkMethod = method;
+            CrouchMethod = method;
+            JumpMethod = method;
+            CrawlMethod = method;
+        }
+    }
 
 
     [Header("Ground Check")]
@@ -144,7 +161,7 @@ public class TotalControl : MonoBehaviour
 
 
         // Walk & Run
-        if (WalkMethod == CurrentMethod.Controller) {
+        if (WalkMethod == CustomMethod.Controller) {
             if (activeHand != null && !isJumping)
             {
                 // 이동벡터 계산
@@ -162,7 +179,7 @@ public class TotalControl : MonoBehaviour
                 isRunning = false;
             }
         }
-        else if(WalkMethod == CurrentMethod.HalfBody) {
+        else if(WalkMethod == CustomMethod.HalfBody) {
             if (leftY < walkThreshold && rightY < walkThreshold)
                 isWalkThreshold = true;
             else isWalkThreshold = false;
@@ -209,7 +226,7 @@ public class TotalControl : MonoBehaviour
 
 
         // Crouch
-        if (CrouchMethod == CurrentMethod.Controller) {
+        if (CrouchMethod == CustomMethod.Controller) {
             if (!isCrawling && crouchAction.GetStateDown(rightInputSource))
             {
                 animator.SetTrigger("Crouch Start");
@@ -246,7 +263,7 @@ public class TotalControl : MonoBehaviour
                 filpLeft = false;
             }
         }
-        else if (CrouchMethod == CurrentMethod.HalfBody) {
+        else if (CrouchMethod == CustomMethod.HalfBody) {
             if (idlecheck && yDiff >= crouchThreshold && !crouchTriggered)
             {
                 animator.SetTrigger("Crouch Start");
@@ -269,7 +286,7 @@ public class TotalControl : MonoBehaviour
         
 
         // Jump
-        if (JumpMethod == CurrentMethod.Controller) {
+        if (JumpMethod == CustomMethod.Controller) {
             bool leftPressed = jumpAction.GetStateDown(leftInputSource);
             bool rightPressed = jumpAction.GetStateDown(rightInputSource);
 
@@ -299,7 +316,7 @@ public class TotalControl : MonoBehaviour
                 isJumping = false;
             }
         }
-        else if (JumpMethod == CurrentMethod.HalfBody) {
+        else if (JumpMethod == CustomMethod.HalfBody) {
             if (idlecheck && leftY >= jumpThreshold && rightY >= jumpThreshold)
             {
                 isJumping = true;
@@ -317,7 +334,7 @@ public class TotalControl : MonoBehaviour
 
 
         // Crawl
-        if (CrawlMethod == CurrentMethod.Controller) {
+        if (CrawlMethod == CustomMethod.Controller) {
             if (!isCrouching && crawlAction.GetStateDown(leftInputSource))
             {
                 Debug.Log("Crawl Left Triggered");
@@ -337,7 +354,7 @@ public class TotalControl : MonoBehaviour
                     activeHand = leftInputSource;
             }
 
-            if (WalkMethod != CurrentMethod.Controller)
+            if (WalkMethod != CustomMethod.Controller)
             {
                 if (activeHand != null && !isJumping)
                 {
@@ -364,7 +381,7 @@ public class TotalControl : MonoBehaviour
                 isCrawling = false;
             }
         }
-        else if (CrawlMethod == CurrentMethod.HalfBody) {
+        else if (CrawlMethod == CustomMethod.HalfBody) {
             if (idlecheck && inCrawlRange)
             {
                 crawlConditionTimer += Time.deltaTime; // 조건 만족 중 → 타이머 증가
