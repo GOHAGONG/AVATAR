@@ -38,7 +38,7 @@ public class TotalControlEditor : Editor
 
         // Draw other default fields below (like Animator variables)
         EditorGUILayout.Space();
-        DrawPropertiesExcluding(serializedObject,
+        DrawPropertiesExcluding(serializedObject, 
             "SelectedMethod", "WalkMethod", "CrouchMethod", "JumpMethod", "CrawlMethod");
 
         serializedObject.ApplyModifiedProperties();

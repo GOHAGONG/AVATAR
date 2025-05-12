@@ -81,15 +81,15 @@ public class TotalControl : MonoBehaviour
     public float jumpForce = 0f;
     private float walkTimer = 0f;
     private float runTimer = 0f;
-    private float walkHoldTime = 0.9f; // ¾ó¸¶ µ¿¾È À¯ÁöÇÒÁö
+    private float walkHoldTime = 0.9f; // ì–¼ë§ˆ ë™ì•ˆ ìœ ì§€í• ì§€
     private float runHoldTime = 1.0f;
-    private float crawlConditionTimer = 0f; // Å©·Ñ Á¶°Ç À¯Áö ½Ã°£ ÃßÀû
-    public float crawlHoldTimeRequired = 0.5f; // 0.5ÃÊ ÀÌ»ó À¯ÁöÇØ¾ß ¹ßµ¿
-    private bool crawlConditionsHeld = false; // Á¶°Ç ¹üÀ§ ¾È¿¡ ÀÖ´ÂÁö
+    private float crawlConditionTimer = 0f; // í¬ë¡¤ ì¡°ê±´ ìœ ì§€ ì‹œê°„ ì¶”ì 
+    public float crawlHoldTimeRequired = 0.5f; // 0.5ì´ˆ ì´ìƒ ìœ ì§€í•´ì•¼ ë°œë™
+    private bool crawlConditionsHeld = false; // ì¡°ê±´ ë²”ìœ„ ì•ˆì— ìˆëŠ”ì§€
     private float crawlStartLeftY;
     private float crawlStartRightY;
-    public float crawlExitDelta = 1.3f; // Å»Ãâ ±âÁØ º¯È­·® (0.3 ÀÌ»óÀÌ¸é Á¾·á)
-    private bool isCrawlingProtected = false; // Å©·Ñ ½ÃÀÛ º¸È£ ÇÃ·¡±×
+    public float crawlExitDelta = 1.3f; // íƒˆì¶œ ê¸°ì¤€ ë³€í™”ëŸ‰ (0.3 ì´ìƒì´ë©´ ì¢…ë£Œ)
+    private bool isCrawlingProtected = false; // í¬ë¡¤ ì‹œì‘ ë³´í˜¸ í”Œë˜ê·¸
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -164,10 +164,10 @@ public class TotalControl : MonoBehaviour
         if (WalkMethod == CustomMethod.Controller) {
             if (activeHand != null && !isJumping)
             {
-                // ÀÌµ¿º¤ÅÍ °è»ê
+                // ì´ë™ë²¡í„° ê³„ì‚°
                 Vector3 move = transform.right * activeInput.x + transform.forward * activeInput.y;
 
-                // ÀÌµ¿ Àû¿ë
+                // ì´ë™ ì ìš©
                 controller.Move(move * moveSpeed * Time.deltaTime);
 
                 isWalking = (activeInput.y > 0.2f);
@@ -188,10 +188,10 @@ public class TotalControl : MonoBehaviour
             {
                 if (isWalkThreshold)
                 {
-                    // Å¸ÀÌ¸Ó ¾÷µ¥ÀÌÆ®
+                    // íƒ€ì´ë¨¸ ì—…ë°ì´íŠ¸
                     if (handsAreCrossing && avgSpeed > 0.05f)
                     {
-                        // Á¶°Ç ¸¸Á·ÇßÀ» ¶§¸¸ Å¸ÀÌ¸Ó ¸®¼Â
+                        // ì¡°ê±´ ë§Œì¡±í–ˆì„ ë•Œë§Œ íƒ€ì´ë¨¸ ë¦¬ì…‹
                         if (avgSpeed >= runThreshold)
                         {
                             runTimer = runHoldTime;
@@ -202,17 +202,17 @@ public class TotalControl : MonoBehaviour
                         }
                     }
 
-                    // Å¸ÀÌ¸Ó °¨¼Ò
+                    // íƒ€ì´ë¨¸ ê°ì†Œ
                     if (walkTimer > 0)
                         walkTimer -= Time.deltaTime;
                     if (runTimer > 0)
                         runTimer -= Time.deltaTime;
 
-                    // »óÅÂ ÆÇ´Ü
+                    // ìƒíƒœ íŒë‹¨
                     isRunning = runTimer > 0f;
                     isWalking = walkTimer > 0f;
 
-                    // µğ¹ö±ë (¼±ÅÃ»çÇ×)
+                    // ë””ë²„ê¹… (ì„ íƒì‚¬í•­)
                     //Debug.Log($"[Move] Cross: {handsAreCrossing}, Speed: {avgSpeed:F2}, WalkT: {walkTimer:F2}, RunT: {runTimer:F2}");
                 }
                 else
@@ -243,7 +243,7 @@ public class TotalControl : MonoBehaviour
             {
 
                 Vector3 newScale = transform.localScale;
-                newScale.x = Mathf.Abs(newScale.x) * -1f; // ¿Ş¼Õ ÀÔ·ÂÀÌ¸é ¹İÀü
+                newScale.x = Mathf.Abs(newScale.x) * -1f; // ì™¼ì† ì…ë ¥ì´ë©´ ë°˜ì „
                 transform.localScale = newScale;
                 filpLeft = true;
 
@@ -258,7 +258,7 @@ public class TotalControl : MonoBehaviour
                 isCrouching = false;
 
                 Vector3 newScale = transform.localScale;
-                newScale.x = Mathf.Abs(newScale.x) * 1f; // ¿Ş¼Õ ÀÔ·ÂÀÌ¸é ¹İÀü
+                newScale.x = Mathf.Abs(newScale.x) * 1f; // ì™¼ì† ì…ë ¥ì´ë©´ ë°˜ì „
                 transform.localScale = newScale;
                 filpLeft = false;
             }
@@ -358,10 +358,10 @@ public class TotalControl : MonoBehaviour
             {
                 if (activeHand != null && !isJumping)
                 {
-                    // ÀÌµ¿º¤ÅÍ °è»ê
+                    // ì´ë™ë²¡í„° ê³„ì‚°
                     Vector3 move = transform.right * activeInput.x + transform.forward * activeInput.y;
 
-                    // ÀÌµ¿ Àû¿ë
+                    // ì´ë™ ì ìš©
                     controller.Move(move * moveSpeed * Time.deltaTime);
 
                     isWalking = (activeInput.y > 0.2f);
@@ -384,7 +384,7 @@ public class TotalControl : MonoBehaviour
         else if (CrawlMethod == CustomMethod.HalfBody) {
             if (idlecheck && inCrawlRange)
             {
-                crawlConditionTimer += Time.deltaTime; // Á¶°Ç ¸¸Á· Áß ¡æ Å¸ÀÌ¸Ó Áõ°¡
+                crawlConditionTimer += Time.deltaTime; // ì¡°ê±´ ë§Œì¡± ì¤‘ â†’ íƒ€ì´ë¨¸ ì¦ê°€
 
                 if (crawlConditionTimer >= crawlHoldTimeRequired && !isCrawling)
                 {
@@ -392,43 +392,42 @@ public class TotalControl : MonoBehaviour
                     animator.SetTrigger("Crawl Start");
                     isCrawling = true;
 
-                    // º¸È£ Å¸ÀÌ¸Ó ½ÃÀÛ 
-                    // ¾Ö´Ï¸ŞÀÌ¼Ç Àç»ıµ¿¾È Crawl Exit Delta °è»êÇÏÁö ¾Êµµ·Ï
+                    // ë³´í˜¸ íƒ€ì´ë¨¸ ì‹œì‘
+                    // ì• ë‹ˆë©”ì´ì…˜ ì¬ìƒë™ì•ˆ Crawl Exit Delta ê³„ì‚°í•˜ì§€ ì•Šë„ë¡
                     StartCoroutine(CrawlProtectionDelay(2.0f));
 
-                    crawlConditionTimer = 0f; // ÃÊ±âÈ­
+                    crawlConditionTimer = 0f; // ì´ˆê¸°í™”
                 }
             }
             else
             {
-                crawlConditionTimer = 0f; // ¹üÀ§ ¹ş¾î³ª¸é Å¸ÀÌ¸Ó ¸®¼Â
+                crawlConditionTimer = 0f; // ë²”ìœ„ ë²—ì–´ë‚˜ë©´ íƒ€ì´ë¨¸ ë¦¬ì…‹
             }
 
             if (isCrawling)
             {
-                // Å¸ÀÌ¸Ó ¾÷µ¥ÀÌÆ®
+                // íƒ€ì´ë¨¸ ì—…ë°ì´íŠ¸
                 if (handsAreCrossing && avgSpeed > 0.05f)
                 {
-                    // // Á¶°Ç ¸¸Á·ÇßÀ» ¶§¸¸ Å¸ÀÌ¸Ó ¸®¼Â
+                    // // ì¡°ê±´ ë§Œì¡±í–ˆì„ ë•Œë§Œ íƒ€ì´ë¨¸ ë¦¬ì…‹
                     // if (avgSpeed >= 0.4f)
                     // {
-                    // runTimer = runHoldTime;
+                        // runTimer = runHoldTime;
                     // }
                     // else
                     // {
-                    walkTimer = walkHoldTime;
+                        walkTimer = walkHoldTime;
                     // }
                 }
 
-                // Å¸ÀÌ¸Ó °¨¼Ò
-                if (walkTimer > 0)
+                // íƒ€ì´ë¨¸ ê°ì†Œ
+                if(walkTimer > 0)
                     walkTimer -= Time.deltaTime;
                 // if(runTimer > 0)
-                // runTimer -= Time.deltaTime;
+                    // runTimer -= Time.deltaTime;
 
-                // »óÅÂ ÆÇ´Ü
+                // ìƒíƒœ íŒë‹¨
                 // isRunning = runTimer > 0f;
-                isWalking = (isCrawling && walkTimer > 0f);
             }
 
             // if (isCrawling && ((leftY < crawlThreshold3 && rightY < crawlThreshold3) || (leftY > crawlThreshold4 && rightY > crawlThreshold4)) )
@@ -454,7 +453,7 @@ public class TotalControl : MonoBehaviour
         }
         else { }
 
-        // Animator ¿¬µ¿
+        // Animator ì—°ë™
         if (animator != null)
         {
             animator.SetBool("isWalking", isWalking);
@@ -470,7 +469,7 @@ public class TotalControl : MonoBehaviour
         yield return new WaitForSeconds(delay);
         isCrawlingProtected = false;
 
-        // ¾şµå·ÈÀ» ¶§ ¼Õ À§Ä¡ ÃÊ±âÈ­
+        // ì—ë“œë ¸ì„ ë•Œ ì† ìœ„ì¹˜ ì´ˆê¸°í™”
         crawlStartLeftY = leftHandPose.transform.position.y; // leftY
         crawlStartRightY = rightHandPose.transform.position.y; // rightY
         Debug.Log("Crawl Start");
