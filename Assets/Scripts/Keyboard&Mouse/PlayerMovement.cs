@@ -34,6 +34,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        Debug.Log("PlayerMovement.cs Update()");
         // Ground Check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (isGrounded && velocity.y < 0)
@@ -77,16 +78,12 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButtonDown("Jump") && isGrounded && !isJumping)
         {
             isJumping = true;
-            StartCoroutine(WaitAndJump());
+            animator.SetTrigger("Jump Prepare");
         }
-
-        IEnumerator WaitAndJump()
+        
+        if (Input.GetButtonUp("Jump") && isGrounded && isJumping)
         {
-            animator.SetTrigger("Jump Start");
-            yield return new WaitForSeconds(0.8f);
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
-            Debug.Log("Jump action triggered!");
-            isJumping = false;
+            StartCoroutine(WaitAndJump());
         }
 
         // Gravity 적용
@@ -105,38 +102,10 @@ public class PlayerMovement : MonoBehaviour
             isCrouching = false;
         }
 
-        // Throw - E key
-        if (Input.GetButtonDown("Throw"))
-        {
-            Debug.Log("Throw action triggered!");
-            animator.SetTrigger("Throw Start");
-            isThrowing = true;
-        }
-
         if (Input.GetButtonUp("Throw") && isThrowing) 
         {
             animator.SetTrigger("Throw End");
             isThrowing = false;
-        }
-
-        // Stomp - Q key
-        if (isGrounded && Input.GetButtonDown("Stomp"))
-        {
-            Debug.Log("Stomp action triggered!");
-            animator.SetTrigger("Stomp");
-        }
-
-        if (Input.GetButtonDown("Lying Down"))
-        {
-            Debug.Log("Lying action triggered!");
-            animator.SetTrigger("Lying Start");
-            isLying = true;
-        }
-
-        if (Input.GetButtonUp("Lying Down") && isLying) 
-        {
-            animator.SetTrigger("Lying End");
-            isLying = false;
         }
 
         if (Input.GetButtonDown("Crawl"))
@@ -151,5 +120,13 @@ public class PlayerMovement : MonoBehaviour
             animator.SetTrigger("Crawl End");
             isCrawling = false;
         }
+    }
+    
+    IEnumerator WaitAndJump()
+    {
+        animator.SetTrigger("Jump Execute");
+        yield return new WaitForSeconds(0.3f);
+        velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
+        isJumping = false;
     }
 }

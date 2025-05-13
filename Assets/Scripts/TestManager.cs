@@ -1,0 +1,179 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections.Generic;
+using System;
+using System.Linq;
+using TMPro;
+
+public class TestManager : MonoBehaviour
+{
+    public enum ActionType
+    {
+        Walk,
+        Run,
+        Jump,
+        Sit,
+        Crawl
+    }
+
+    public enum ControlType
+    {
+        KeyboardMouse,
+        Controller,
+        HalfBody,
+        FullBody
+    }
+
+    private enum TestState
+    {
+        WaitingForActionComplete,
+        WaitingForSurveyInput,
+        TestCompleted
+    }
+
+    [Header("실험 설정")]
+    public ControlType currentControl;
+    
+    private List<ActionType> currentTrialSequence;
+    private int currentTrialIndex = 0;
+    private TestState currentState = TestState.WaitingForActionComplete;
+
+    [Header("UI")]
+    public TMP_Text ControlTypeUI;
+    public GameObject WalkUI;
+    public GameObject RunUI;
+    public GameObject SitUI;
+    public GameObject CrawlUI;
+    public GameObject JumpUI;
+    public GameObject NASAFMS_UI;
+    public GameObject SUSVRSQ_UI;
+
+    private void Start()
+    {
+        UpdateControlTypeUI();
+        currentTrialSequence = GenerateRandomizedSequence();
+        currentTrialIndex = 0;
+        StartNextTrial();
+    }
+
+    private void Update()
+    {
+        // Enter 누르면 NASA&FMS 설문 or 다음 동작 수행
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (currentState == TestState.WaitingForActionComplete)
+            {
+                ShowNASAFMS();
+            }
+            else if (currentState == TestState.WaitingForSurveyInput)
+            {
+                StartNextTrial();
+            }
+        }
+    }
+    
+    private void UpdateControlTypeUI()
+    {
+        string displayText = "";
+
+        switch (currentControl)
+        {
+            case ControlType.KeyboardMouse:
+                displayText = "Keyboard + Mouse";
+                break;
+            case ControlType.Controller:
+                displayText = "Controller";
+                break;
+            case ControlType.HalfBody:
+                displayText = "Half Body";
+                break;
+            case ControlType.FullBody:
+                displayText = "Full Body";
+                break;
+        }
+
+        ControlTypeUI.text = $"Control Type: {displayText}";
+    }
+    
+    private List<ActionType> GenerateRandomizedSequence()
+    {
+        List<ActionType> result = new List<ActionType>();
+        
+        //동작 랜덤 시퀀스 생성
+        var shuffled = Enum.GetValues(typeof(ActionType))
+                                   .Cast<ActionType>()
+                                   .OrderBy(x => UnityEngine.Random.value)
+                                   .ToList();
+        result.AddRange(shuffled);
+        return result;
+    }
+
+    public void StartNextTrial()
+    {
+        HideAllUI();
+
+        // 모든 동작 수행했을 시
+        if (currentTrialIndex >= currentTrialSequence.Count)
+        {
+            StartPostControlSurvey();
+            currentState = TestState.TestCompleted;
+            return;
+        }
+
+        // 남은 동작 있을 시
+        ActionType action = currentTrialSequence[currentTrialIndex];
+        currentTrialIndex++;
+
+        StartActionUI(action);
+        currentState = TestState.WaitingForActionComplete;
+    }
+
+    public void StartActionUI(ActionType action)
+    {
+        HideAllUI();
+
+        switch (action)
+        {
+            case ActionType.Walk:
+                WalkUI.SetActive(true);
+                break;
+            case ActionType.Run:
+                RunUI.SetActive(true);
+                break;
+            case ActionType.Jump:
+                JumpUI.SetActive(true);
+                break;
+            case ActionType.Sit:
+                SitUI.SetActive(true);
+                break;
+            case ActionType.Crawl:
+                CrawlUI.SetActive(true);
+                break;
+        }
+    }
+
+    private void ShowNASAFMS()
+    {
+        HideAllUI();
+        NASAFMS_UI.SetActive(true);
+        currentState = TestState.WaitingForSurveyInput;
+    }
+
+    public void StartPostControlSurvey()
+    {
+        HideAllUI();
+        SUSVRSQ_UI.SetActive(true);
+        Debug.Log($"[{currentControl}] 모든 동작 완료, SUS & VRSQ 설문 시작");
+    }
+
+    private void HideAllUI()
+    {
+        WalkUI.SetActive(false);
+        RunUI.SetActive(false);
+        JumpUI.SetActive(false);
+        SitUI.SetActive(false);
+        CrawlUI.SetActive(false);
+        NASAFMS_UI.SetActive(false);
+        SUSVRSQ_UI.SetActive(false);
+    }
+}
