@@ -4152,7 +4152,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hmdCamera: {fileID: 7645154}
   distance: 2
-  offset: {x: 0, y: 1, z: 0}
+  offset: {x: 0, y: 2, z: 0}
 --- !u!114 &1824006140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4184,7 +4184,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hmdCamera: {fileID: 1819844998}
   distance: 2
-  offset: {x: 0, y: -0.3, z: 0}
+  offset: {x: 0, y: 2, z: 0}
 --- !u!1 &1939782342
 GameObject:
   m_ObjectHideFlags: 0
