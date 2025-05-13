@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -31,8 +30,11 @@ public class TestManager : MonoBehaviour
         TestCompleted
     }
 
-    [Header("실험 설정")]
+    [Header("실험 설정")] 
+    public ActionType currentAction;
     public ControlType currentControl;
+    
+    public GameObject Target;
     
     private List<ActionType> currentTrialSequence;
     private int currentTrialIndex = 0;
@@ -111,6 +113,9 @@ public class TestManager : MonoBehaviour
     public void StartNextTrial()
     {
         HideAllUI();
+        
+        // target object off
+        Target.SetActive(false);
 
         // 모든 동작 수행했을 시
         if (currentTrialIndex >= currentTrialSequence.Count)
@@ -121,14 +126,14 @@ public class TestManager : MonoBehaviour
         }
 
         // 남은 동작 있을 시
-        ActionType action = currentTrialSequence[currentTrialIndex];
+        currentAction = currentTrialSequence[currentTrialIndex];
         currentTrialIndex++;
 
-        StartActionUI(action);
+        StartAction(currentAction);
         currentState = TestState.WaitingForActionComplete;
     }
 
-    public void StartActionUI(ActionType action)
+    public void StartAction(ActionType action)
     {
         HideAllUI();
 
@@ -136,9 +141,17 @@ public class TestManager : MonoBehaviour
         {
             case ActionType.Walk:
                 WalkUI.SetActive(true);
+                
+                // target object setting
+                Target.SetActive(true);
+                Target.GetComponent<Animation>().Play("walkTarget");
                 break;
             case ActionType.Run:
                 RunUI.SetActive(true);
+                
+                // target object setting
+                Target.SetActive(true);
+                Target.GetComponent<Animation>().Play("runTarget");
                 break;
             case ActionType.Jump:
                 JumpUI.SetActive(true);
@@ -148,6 +161,10 @@ public class TestManager : MonoBehaviour
                 break;
             case ActionType.Crawl:
                 CrawlUI.SetActive(true);
+                
+                // target object setting
+                Target.SetActive(true);
+                Target.GetComponent<Animation>().Play("crawlTarget");
                 break;
         }
     }
