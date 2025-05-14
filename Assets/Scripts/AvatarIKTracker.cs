@@ -5,8 +5,10 @@ using Valve.VR;
 [RequireComponent(typeof(Animator))]
 public class AvatarIKTracker : MonoBehaviour
 {
-    public Transform leftTrackerTransform;
-    public Transform rightTrackerTransform;
+    public Transform leftFootTrackerTransform;
+    public Transform rightFootTrackerTransform;
+    public Transform leftKneeTrackerTransform;
+    public Transform rightKneeTrackerTransform;
 
     private Animator animator;
 
@@ -19,17 +21,23 @@ public class AvatarIKTracker : MonoBehaviour
     {
         if (animator)
         {
-            // 왼발
-            animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1);
-            animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1);
-            animator.SetIKPosition(AvatarIKGoal.LeftFoot, leftTrackerTransform.position);
-            animator.SetIKRotation(AvatarIKGoal.LeftFoot, leftTrackerTransform.rotation);
+            // // 왼발
+            // animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1);
+            // animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1);
+            // animator.SetIKPosition(AvatarIKGoal.LeftFoot, leftFootTrackerTransform.position);
+            // animator.SetIKRotation(AvatarIKGoal.LeftFoot, leftFootTrackerTransform.rotation);
 
-            // 오른발
-            animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1);
-            animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1);
-            animator.SetIKPosition(AvatarIKGoal.RightFoot, rightTrackerTransform.position);
-            animator.SetIKRotation(AvatarIKGoal.RightFoot, rightTrackerTransform.rotation);
+            // // 오른발
+            // animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1);
+            // animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1);
+            // animator.SetIKPosition(AvatarIKGoal.RightFoot, rightFootTrackerTransform.position);
+            // animator.SetIKRotation(AvatarIKGoal.RightFoot, rightFootTrackerTransform.rotation);
+
+            // 무릎
+            animator.SetIKHintPositionWeight(AvatarIKHint.LeftKnee, 1f);
+            animator.SetIKHintPositionWeight(AvatarIKHint.RightKnee, 1f);
+            animator.SetIKHintPosition(AvatarIKHint.LeftKnee, leftKneeTrackerTransform.position);
+            animator.SetIKHintPosition(AvatarIKHint.RightKnee, rightKneeTrackerTransform.position);
         }
     }
 }

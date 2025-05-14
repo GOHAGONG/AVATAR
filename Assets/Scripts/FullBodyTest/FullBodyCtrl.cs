@@ -21,8 +21,12 @@ public class FullBodyCtrl : MonoBehaviour
     public float crouchThreshold;
     private bool crouchTriggered = false;
     public float jumpThreshold;
+    public float jumpExitThreshold;
     public float crawlThreshold1;
     public float crawlThreshold2;
+    public float walkThreshold;
+    public bool isWalkThreshold;
+    public float runThreshold;
     // public float crawlThreshold3;
     // public float crawlThreshold4;
 
@@ -39,17 +43,25 @@ public class FullBodyCtrl : MonoBehaviour
     public SteamVR_Action_Boolean jumpAction;
     public SteamVR_Action_Boolean crouchAction;
     public SteamVR_Action_Boolean crawlAction;
-    public SteamVR_Input_Sources leftInputSource = SteamVR_Input_Sources.LeftHand;
-    public SteamVR_Input_Sources rightInputSource = SteamVR_Input_Sources.RightHand;
+    public SteamVR_Input_Sources leftHandInputSource = SteamVR_Input_Sources.LeftHand;
+    public SteamVR_Input_Sources rightHandInputSource = SteamVR_Input_Sources.RightHand;
+    public SteamVR_Input_Sources leftFootInputSource = SteamVR_Input_Sources.LeftFoot;
+    public SteamVR_Input_Sources rightFootInputSource = SteamVR_Input_Sources.RightFoot;
     private SteamVR_Input_Sources? activeHand = null;
 
 
     public SteamVR_Behaviour_Pose leftHandPose;
     public SteamVR_Behaviour_Pose rightHandPose;
-    private Vector3 prevLeftPos;
-    private Vector3 prevRightPos;
-    private float leftSwingAmount;
-    private float rightSwingAmount;
+    public SteamVR_Behaviour_Pose leftFootPose;
+    public SteamVR_Behaviour_Pose rightFootPose;
+    private Vector3 prevLeftHandPos;
+    private Vector3 prevRightHandPos;
+    private Vector3 prevLeftFootPos;
+    private Vector3 prevRightFootPos;
+    private float leftHandSwingAmount;
+    private float rightHandSwingAmount;
+    private float leftFootSwingAmount;
+    private float rightFootSwingAmount;
 
     [Header("Moving_velocity")]
     private float walkTimer = 0f;
@@ -69,8 +81,10 @@ public class FullBodyCtrl : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
 
-        prevLeftPos = leftHandPose.transform.position;
-        prevRightPos = rightHandPose.transform.position;
+        prevLeftHandPos = leftHandPose.transform.position;
+        prevRightHandPos = rightHandPose.transform.position;
+        prevLeftFootPos = leftFootPose.transform.position;
+        prevRightFootPos = rightFootPose.transform.position;
         
     }
 
@@ -82,17 +96,25 @@ public class FullBodyCtrl : MonoBehaviour
             velocity.y = -2f;
         
         // 속도 계산
-        Vector3 leftVel = leftHandPose.GetVelocity();
-        Vector3 rightVel = rightHandPose.GetVelocity();
+        Vector3 leftHandVel = leftHandPose.GetVelocity();
+        Vector3 rightHandVel = rightHandPose.GetVelocity();
+        Vector3 leftFootVel = leftFootPose.GetVelocity();
+        Vector3 rightFootVel = rightFootPose.GetVelocity();
 
-        float leftForward = Vector3.Dot(transform.forward, leftVel);
-        float rightForward = Vector3.Dot(transform.forward, rightVel);
+        float leftHandForward = Vector3.Dot(transform.forward, leftHandVel);
+        float rightHandForward = Vector3.Dot(transform.forward, rightHandVel);
+        float leftFootForward = Vector3.Dot(transform.forward, leftFootVel);
+        float rightFootForward = Vector3.Dot(transform.forward, rightFootVel);
 
-        float avgSpeed = (Mathf.Abs(leftForward) + Mathf.Abs(rightForward)) / 2f;
+        float avgHandSpeed = (Mathf.Abs(leftHandForward) + Mathf.Abs(rightHandForward)) / 2f;
+        float avgFootSpeed = (Mathf.Abs(leftFootForward) + Mathf.Abs(rightFootForward)) / 2f;
 
         // 손 교차 판단
-        bool handsAreCrossing = (leftForward > 0.05f && rightForward < -0.05f) ||
-                                (leftForward < -0.05f && rightForward > 0.05f);
+        bool handsAreCrossing = (leftHandForward > 0.05f && rightHandForward < -0.05f) ||
+                                (leftHandForward < -0.05f && rightHandForward > 0.05f);
+                                // 손 교차 판단
+        bool feetAreCrossing = (leftFootForward > 0.05f && rightFootForward < -0.05f) ||
+                                (leftFootForward < -0.05f && rightFootForward > 0.05f);
         
         // 높이 계산
         float leftY = leftHandPose.transform.position.y;
@@ -106,7 +128,7 @@ public class FullBodyCtrl : MonoBehaviour
             isJumping = true;
             animator.SetTrigger("Jump Prepare");
         }
-        if(isJumping && leftY < jumpThreshold && rightY < jumpThreshold){
+        if(isJumping && leftY < jumpExitThreshold && rightY < jumpExitThreshold){
             animator.SetTrigger("Jump Execute");
             velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
             Debug.Log("Jump executed!");
@@ -141,7 +163,7 @@ public class FullBodyCtrl : MonoBehaviour
 
         if(isCrawling){
             // 타이머 업데이트
-            if (handsAreCrossing && avgSpeed > 0.05f)
+            if (handsAreCrossing && avgHandSpeed > 0.05f)
             {
                 // // 조건 만족했을 때만 타이머 리셋
                 // if (avgSpeed >= 0.4f)
@@ -203,33 +225,45 @@ public class FullBodyCtrl : MonoBehaviour
             Debug.Log("Crouch End");
         }
 
+        if (leftY < walkThreshold && rightY < walkThreshold)
+            isWalkThreshold = true;
+        else isWalkThreshold = false;
+        
         if(!isCrawling && !isCrouching && !isJumping){
-            // 타이머 업데이트
-            if (handsAreCrossing && avgSpeed > 0.05f)
+            if(isWalkThreshold)
             {
-                // 조건 만족했을 때만 타이머 리셋
-                if (avgSpeed >= 0.7f)
+                // 타이머 업데이트
+                if (handsAreCrossing && avgHandSpeed > 0.05f && feetAreCrossing && avgFootSpeed > 0.05f)
                 {
-                    runTimer = runHoldTime;
+                    Debug.Log("Foot Speed: " + avgFootSpeed);
+                    // 조건 만족했을 때만 타이머 리셋
+                    if (avgFootSpeed >= 0.9f)
+                    {
+                        runTimer = runHoldTime;
+                    }
+                    else
+                    {
+                        walkTimer = walkHoldTime;
+                    }
                 }
-                else
-                {
-                    walkTimer = walkHoldTime;
-                }
+
+                // 타이머 감소
+                if(walkTimer > 0)
+                    walkTimer -= Time.deltaTime;
+                if(runTimer > 0)
+                    runTimer -= Time.deltaTime;
+
+                // 상태 판단
+                isRunning = runTimer > 0f;
+                isWalking = walkTimer > 0f;
+
+                // 디버깅 (선택사항)
+                //Debug.Log($"[Move] Cross: {handsAreCrossing}, Speed: {avgSpeed:F2}, WalkT: {walkTimer:F2}, RunT: {runTimer:F2}");
             }
-
-            // 타이머 감소
-            if(walkTimer > 0)
-                walkTimer -= Time.deltaTime;
-            if(runTimer > 0)
-                runTimer -= Time.deltaTime;
-
-            // 상태 판단
-            isRunning = runTimer > 0f;
-            isWalking = walkTimer > 0f;
-
-            // 디버깅 (선택사항)
-            //Debug.Log($"[Move] Cross: {handsAreCrossing}, Speed: {avgSpeed:F2}, WalkT: {walkTimer:F2}, RunT: {runTimer:F2}");
+            else{
+                isRunning = false;
+                isWalking = false;
+            }
         }
 
         // Animator 연동

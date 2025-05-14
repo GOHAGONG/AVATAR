@@ -23,7 +23,7 @@ public class TestManager : MonoBehaviour
         FullBody
     }
 
-    private enum TestState
+    public enum TestState
     {
         WaitingForActionComplete,
         WaitingForSurveyInput,
@@ -38,7 +38,7 @@ public class TestManager : MonoBehaviour
     
     private List<ActionType> currentTrialSequence;
     private int currentTrialIndex = 0;
-    private TestState currentState = TestState.WaitingForActionComplete;
+    public TestState currentState = TestState.WaitingForActionComplete;
 
     [Header("UI")]
     public TMP_Text ControlTypeUI;
@@ -63,14 +63,20 @@ public class TestManager : MonoBehaviour
         // Enter 누르면 NASA&FMS 설문 or 다음 동작 수행
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            if (currentState == TestState.WaitingForActionComplete)
-            {
-                ShowNASAFMS();
-            }
-            else if (currentState == TestState.WaitingForSurveyInput)
-            {
-                StartNextTrial();
-            }
+            Debug.Log("Enter");
+            TryTransitionToSurvey();
+        }
+    }
+
+    public void TryTransitionToSurvey()
+    {
+        if (currentState == TestState.WaitingForActionComplete)
+        {
+            ShowNASAFMS();
+        }
+        else if (currentState == TestState.WaitingForSurveyInput)
+        {
+            StartNextTrial();
         }
     }
     

@@ -25,8 +25,6 @@ public class HalfBodyCtrl : MonoBehaviour
     public float jumpExitThreshold;
     public float crawlThreshold1;
     public float crawlThreshold2;
-    public float crawlThreshold3;
-    public float crawlThreshold4;
     public float walkThreshold;
     public bool isWalkThreshold;
     public float runThreshold;

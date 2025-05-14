@@ -16,8 +16,8 @@ public class CameraRigAligner : MonoBehaviour
     public Transform avatarHead;
     public Transform avatarLeftHand;
     public Transform avatarRightHand;
-    public Transform avatarLeftElbow;
-    public Transform avatarRightElbow;
+    public Transform avatarLeftKnee;
+    public Transform avatarRightKnee;
     public Transform avatarLeftFoot;
     public Transform avatarRightFoot;
 
@@ -25,9 +25,9 @@ public class CameraRigAligner : MonoBehaviour
     public Vector3 leftHandOffset = Vector3.zero;
     public Vector3 rightHandOffset = Vector3.zero;
 
-    [Header("옵션: 팔꿈치 위치 미세 보정")]
-    public Vector3 leftElbowOffset = Vector3.zero;
-    public Vector3 rightElbowOffset = Vector3.zero;
+    [Header("옵션: 무릎 위치 미세 보정")]
+    public Vector3 leftKneeOffset = Vector3.zero;
+    public Vector3 rightKneeOffset = Vector3.zero;
     [Header("옵션: 발 위치 미세 보정")]
     public Vector3 leftFootOffset = Vector3.zero;
     public Vector3 rightFootOffset = Vector3.zero;
@@ -64,12 +64,12 @@ public class CameraRigAligner : MonoBehaviour
         avatarRightHand.position = rightControllerTransform.position + rightHandOffset;
         avatarRightHand.rotation = rightControllerTransform.rotation;
 
-        // Elbow
-        // avatarLeftElbow.position = leftTrackerTransform.position + leftElbowOffset;
-        // avatarLeftElbow.rotation = leftTrackerTransform.rotation;
+        // Knee
+        // avatarLeftKnee.position = leftTrackerTransform.position + leftKneeOffset;
+        // avatarLeftKnee.rotation = leftTrackerTransform.rotation;
 
-        // avatarRightElbow.position = rightTrackerTransform.position + rightElbowOffset;
-        // avatarRightElbow.rotation = rightTrackerTransform.rotation;
+        // avatarRightKnee.position = rightTrackerTransform.position + rightKneeOffset;
+        // avatarRightKnee.rotation = rightTrackerTransform.rotation;
 
         // Foot
         // avatarLeftFoot.position = leftTrackerTransform.position + leftFootOffset;
