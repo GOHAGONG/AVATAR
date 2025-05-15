@@ -4,6 +4,9 @@ using Valve.VR;
 
 public class FullBodyCtrl : MonoBehaviour
 {
+    [Header("Scripts 참조")]
+    public CameraRigAligner cameraRigAligner;
+
     [Header("Movement")]
     public float moveSpeed = 0f;
     public float jumpForce = 0f;
@@ -12,9 +15,20 @@ public class FullBodyCtrl : MonoBehaviour
     private CharacterController controller;
     private Vector3 velocity;
     public bool isGrounded;
+
+    [Header("Ground Check")]
+    public Transform groundCheck;
+    public float groundDistance = 0.1f;
+    public LayerMask groundMask;
+
+    [Header("Animator")]
+    public Animator animator;
+
+    [Header("Animation flag")]
     public bool isCrouching = false;
     public bool isWalking = false;
     public bool isRunning = false;
+    public bool isJumpPrepared = false;
     public bool isJumping = false;
     public bool isCrawling = false;
     public bool filpLeft = false;
@@ -27,43 +41,8 @@ public class FullBodyCtrl : MonoBehaviour
     public float walkThreshold;
     public bool isWalkThreshold;
     public float runThreshold;
-    // public float crawlThreshold3;
-    // public float crawlThreshold4;
 
-    [Header("Ground Check")]
-    public Transform groundCheck;
-    public float groundDistance = 0.1f;
-    public LayerMask groundMask;
-
-    [Header("Animation")]
-    public Animator animator;
-
-    [Header("VR Input")]
-    public SteamVR_Action_Vector2 trackpadAxisAction;
-    public SteamVR_Action_Boolean jumpAction;
-    public SteamVR_Action_Boolean crouchAction;
-    public SteamVR_Action_Boolean crawlAction;
-    public SteamVR_Input_Sources leftHandInputSource = SteamVR_Input_Sources.LeftHand;
-    public SteamVR_Input_Sources rightHandInputSource = SteamVR_Input_Sources.RightHand;
-    public SteamVR_Input_Sources leftFootInputSource = SteamVR_Input_Sources.LeftFoot;
-    public SteamVR_Input_Sources rightFootInputSource = SteamVR_Input_Sources.RightFoot;
-    private SteamVR_Input_Sources? activeHand = null;
-
-
-    public SteamVR_Behaviour_Pose leftHandPose;
-    public SteamVR_Behaviour_Pose rightHandPose;
-    public SteamVR_Behaviour_Pose leftFootPose;
-    public SteamVR_Behaviour_Pose rightFootPose;
-    private Vector3 prevLeftHandPos;
-    private Vector3 prevRightHandPos;
-    private Vector3 prevLeftFootPos;
-    private Vector3 prevRightFootPos;
-    private float leftHandSwingAmount;
-    private float rightHandSwingAmount;
-    private float leftFootSwingAmount;
-    private float rightFootSwingAmount;
-
-    [Header("Moving_velocity")]
+    [Header("Animation Protecting")]
     private float walkTimer = 0f;
     private float runTimer = 0f;
     private float walkHoldTime = 0.9f; // 얼마 동안 유지할지
@@ -75,7 +54,33 @@ public class FullBodyCtrl : MonoBehaviour
     private float crawlStartRightY;
     public float crawlExitDelta = 1.3f; // 탈출 기준 변화량 (0.3 이상이면 종료)
     private bool isCrawlingProtected = false; // 크롤 시작 보호 플래그
+    public bool isJumpingProtected = false;
 
+    [Header("VR Input")]
+    public SteamVR_Action_Vector2 trackpadAxisAction;
+    public SteamVR_Action_Boolean jumpAction;
+    public SteamVR_Action_Boolean crouchAction;
+    public SteamVR_Action_Boolean crawlAction;
+    public SteamVR_Input_Sources leftHandInputSource = SteamVR_Input_Sources.LeftHand;
+    public SteamVR_Input_Sources rightHandInputSource = SteamVR_Input_Sources.RightHand;
+    public SteamVR_Input_Sources leftFootInputSource = SteamVR_Input_Sources.LeftFoot;
+    public SteamVR_Input_Sources rightFootInputSource = SteamVR_Input_Sources.RightFoot;
+    // public SteamVR_Input_Sources rightKneeInputSource = SteamVR_Input_Sources.RightKnee;
+    private SteamVR_Input_Sources? activeHand = null;
+    public SteamVR_Behaviour_Pose leftHandPose;
+    public SteamVR_Behaviour_Pose rightHandPose;
+    public SteamVR_Behaviour_Pose leftFootPose;
+    public SteamVR_Behaviour_Pose rightFootPose;
+    // public SteamVR_Behaviour_Pose rightKneePose;
+    private Vector3 prevLeftHandPos;
+    private Vector3 prevRightHandPos;
+    private Vector3 prevLeftFootPos;
+    private Vector3 prevRightFootPos;
+    // private Vector3 prevRightKneePos;
+    private float leftHandSwingAmount;
+    private float rightHandSwingAmount;
+    private float leftFootSwingAmount;
+    private float rightFootSwingAmount;
 
     void Start()
     {
@@ -85,7 +90,6 @@ public class FullBodyCtrl : MonoBehaviour
         prevRightHandPos = rightHandPose.transform.position;
         prevLeftFootPos = leftFootPose.transform.position;
         prevRightFootPos = rightFootPose.transform.position;
-        
     }
 
     void Update()
@@ -117,27 +121,40 @@ public class FullBodyCtrl : MonoBehaviour
                                 (leftFootForward < -0.05f && rightFootForward > 0.05f);
         
         // 높이 계산
-        float leftY = leftHandPose.transform.position.y;
-        float rightY = rightHandPose.transform.position.y;
-        float yDiff = Mathf.Abs(leftY - rightY);
-        // bool leftLower = leftY < rightY;
-
+        float leftHandY = leftHandPose.transform.position.y;
+        float rightHandY = rightHandPose.transform.position.y;
+        // float rightKneeY = rightKneePose.transform.position.y;
+        float leftFootY = leftFootPose.transform.position.y;
+        float rightFootY = rightFootPose.transform.position.y;
+        float yDiff = Mathf.Abs(leftHandY - rightHandY);
+        
         bool idlecheck = !isJumping && !isCrawling && !isCrouching && !isWalking && !isWalking;
 
-        if(idlecheck && leftY >= jumpThreshold && rightY >= jumpThreshold){
-            isJumping = true;
+        // Jump
+        if(!isJumpPrepared && idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold){
             animator.SetTrigger("Jump Prepare");
-        }
-        if(isJumping && leftY < jumpExitThreshold && rightY < jumpExitThreshold){
-            animator.SetTrigger("Jump Execute");
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
-            Debug.Log("Jump executed!");
-            isJumping = false;
+            isJumpPrepared = true;
         }
 
-        // 크롤 진입 조건 범위 안에 있는지 판단
-        bool inCrawlRange = leftY > crawlThreshold1 && leftY < crawlThreshold2 &&
-                            rightY > crawlThreshold1 && rightY < crawlThreshold2;
+        if(isJumpPrepared && leftFootY > 0.3f && rightFootY > 0.3f){
+            isJumpPrepared = false;
+            animator.SetTrigger("Jump Execute");
+            isJumping = true;
+            Debug.Log("Jump executed!");
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
+            StartCoroutine(JumpProtectionDelay(1.2f));
+        }
+
+        if(!isJumping && isJumpPrepared && !isJumpingProtected && leftHandY < jumpExitThreshold && rightHandY < jumpExitThreshold){
+            isJumpPrepared = false;
+            animator.SetTrigger("Jump Cancel");
+            Debug.Log("Jump canceled!");
+        }
+
+        // Crawl
+        bool inCrawlRange = Mathf.Abs(leftHandY-leftFootY) < 0.05f && 
+                            Mathf.Abs(rightHandY-rightFootY) < 0.05f;
+        Debug.Log($"Crawl Check | LH-LF: {Mathf.Abs(leftHandY - leftFootY):F2}, RH-RF: {Mathf.Abs(rightHandY - rightFootY):F2}");
 
         if (idlecheck && inCrawlRange)
         {
@@ -145,9 +162,14 @@ public class FullBodyCtrl : MonoBehaviour
 
             if (crawlConditionTimer >= crawlHoldTimeRequired && !isCrawling)
                 {
-                    //Debug.Log("Crawl Triggered after Hold");
                     animator.SetTrigger("Crawl Start");
                     isCrawling = true;
+                    // cameraRigAligner.rootOffset = new Vector3(
+                    //     cameraRigAligner.rootOffset.x,
+                    //     0f,
+                    //     cameraRigAligner.rootOffset.z
+                    // );
+                    cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
 
                     // 보호 타이머 시작 
                     // 애니메이션 재생동안 Crawl Exit Delta 계산하지 않도록
@@ -165,6 +187,7 @@ public class FullBodyCtrl : MonoBehaviour
             // 타이머 업데이트
             if (handsAreCrossing && avgHandSpeed > 0.05f)
             {
+                Debug.Log("isCrawling true");
                 // // 조건 만족했을 때만 타이머 리셋
                 // if (avgSpeed >= 0.4f)
                 // {
@@ -195,37 +218,47 @@ public class FullBodyCtrl : MonoBehaviour
 
         if (isCrawling && !isCrawlingProtected)
         {
-            float leftDelta = Mathf.Abs(leftY - crawlStartLeftY);
-            float rightDelta = Mathf.Abs(rightY - crawlStartRightY);
+            float leftDelta = Mathf.Abs(leftHandY - crawlStartLeftY);
+            float rightDelta = Mathf.Abs(rightHandY - crawlStartRightY);
 
-            Debug.Log("left Delta: " + leftDelta);
+            // Debug.Log("left Delta: " + leftDelta);
 
             if (leftDelta > crawlExitDelta && rightDelta > crawlExitDelta)
             {
                 //Debug.Log("Crawl End triggered by movement delta");
                 animator.SetTrigger("Crawl End");
                 isCrawling = false;
+                // cameraRigAligner.rootOffset = new Vector3(
+                //     cameraRigAligner.rootOffset.x,
+                //     1f,
+                //     cameraRigAligner.rootOffset.z
+                // );
+                cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
             }
         }
 
-
-        if (idlecheck && yDiff >= crouchThreshold && !crouchTriggered)
+        // Crouch
+        if (idlecheck && Mathf.Abs(rightHandY - rightFootY) < 0.05f &&
+            yDiff >= crouchThreshold && !crouchTriggered)
         {
             animator.SetTrigger("Crouch Start");
+            cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
             isCrouching = true;
             crouchTriggered = true;
             Debug.Log("Crouch Start");
         }
 
-        if (isCrouching && yDiff < crouchThreshold * 0.5f && crouchTriggered) 
+        if (isCrouching && rightHandY - rightFootY > crouchThreshold && crouchTriggered) 
         {
             animator.SetTrigger("Crouch End");
+            cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
             isCrouching = false;
             crouchTriggered = false;
             Debug.Log("Crouch End");
         }
 
-        if (leftY < walkThreshold && rightY < walkThreshold)
+        // Walk & Run
+        if (leftHandY < walkThreshold && rightHandY < walkThreshold)
             isWalkThreshold = true;
         else isWalkThreshold = false;
         
@@ -235,7 +268,6 @@ public class FullBodyCtrl : MonoBehaviour
                 // 타이머 업데이트
                 if (handsAreCrossing && avgHandSpeed > 0.05f && feetAreCrossing && avgFootSpeed > 0.05f)
                 {
-                    Debug.Log("Foot Speed: " + avgFootSpeed);
                     // 조건 만족했을 때만 타이머 리셋
                     if (avgFootSpeed >= 0.9f)
                     {
@@ -256,9 +288,6 @@ public class FullBodyCtrl : MonoBehaviour
                 // 상태 판단
                 isRunning = runTimer > 0f;
                 isWalking = walkTimer > 0f;
-
-                // 디버깅 (선택사항)
-                //Debug.Log($"[Move] Cross: {handsAreCrossing}, Speed: {avgSpeed:F2}, WalkT: {walkTimer:F2}, RunT: {runTimer:F2}");
             }
             else{
                 isRunning = false;
@@ -286,5 +315,12 @@ public class FullBodyCtrl : MonoBehaviour
         crawlStartLeftY = leftHandPose.transform.position.y; // leftY
         crawlStartRightY = rightHandPose.transform.position.y; // rightY
         Debug.Log("Crawl Start");
+    }
+    private IEnumerator JumpProtectionDelay(float delay)
+    {
+        isJumpingProtected = true;
+        yield return new WaitForSeconds(delay);
+        isJumpingProtected = false;
+        isJumping = false;
     }
 }
