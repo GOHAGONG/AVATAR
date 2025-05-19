@@ -63,8 +63,6 @@ public class CameraRigAligner : MonoBehaviour
         avatarHead.position = hmdTransform.position;
         avatarHead.rotation = hmdTransform.rotation;
 
-        Debug.Log(avatarHead.position);
-
         // Hand
         avatarLeftHand.position = leftControllerTransform.position + leftHandOffset;
         avatarLeftHand.rotation = leftControllerTransform.rotation;
@@ -90,6 +88,6 @@ public class CameraRigAligner : MonoBehaviour
     // hmd가 내려갔는데 아바타 다리가 올라오는 문제 해결
     void LateUpdate()
     {
-    avatarRoot.position = transform.position + rootOffset;
+        avatarRoot.position = transform.position + rootOffset;
     }
 }

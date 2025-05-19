@@ -130,30 +130,31 @@ public class FullBodyCtrl : MonoBehaviour
         
         bool idlecheck = !isJumping && !isCrawling && !isCrouching && !isWalking && !isWalking;
 
-        // Jump
-        if(!isJumpPrepared && idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold){
-            animator.SetTrigger("Jump Prepare");
-            isJumpPrepared = true;
-        }
+        // hmd의 y값이 아바타를 따라오지 않기 때문에 애니메이션을 틀 필요가 없어보임
+        // // Jump
+        // if(!isJumpPrepared && idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold){
+        //     animator.SetTrigger("Jump Prepare");
+        //     isJumpPrepared = true;
+        // }
 
-        if(isJumpPrepared && leftFootY > 0.3f && rightFootY > 0.3f){
-            isJumpPrepared = false;
-            animator.SetTrigger("Jump Execute");
-            isJumping = true;
-            Debug.Log("Jump executed!");
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
-            StartCoroutine(JumpProtectionDelay(1.2f));
-        }
+        // if(isJumpPrepared && leftFootY > 0.3f && rightFootY > 0.3f){
+        //     isJumpPrepared = false;
+        //     animator.SetTrigger("Jump Execute");
+        //     isJumping = true;
+        //     Debug.Log("Jump executed!");
+        //     velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
+        //     StartCoroutine(JumpProtectionDelay(1.2f));
+        // }
 
-        if(!isJumping && isJumpPrepared && !isJumpingProtected && leftHandY < jumpExitThreshold && rightHandY < jumpExitThreshold){
-            isJumpPrepared = false;
-            animator.SetTrigger("Jump Cancel");
-            Debug.Log("Jump canceled!");
-        }
+        // if(!isJumping && isJumpPrepared && !isJumpingProtected && leftHandY < jumpExitThreshold && rightHandY < jumpExitThreshold){
+        //     isJumpPrepared = false;
+        //     animator.SetTrigger("Jump Cancel");
+        //     Debug.Log("Jump canceled!");
+        // }
 
         // Crawl
-        bool inCrawlRange = Mathf.Abs(leftHandY-leftFootY) < 0.05f && 
-                            Mathf.Abs(rightHandY-rightFootY) < 0.05f;
+        bool inCrawlRange = Mathf.Abs(leftHandY - leftFootY) < 0.1f &&
+                            Mathf.Abs(rightHandY - rightFootY) < 0.1f;
         Debug.Log($"Crawl Check | LH-LF: {Mathf.Abs(leftHandY - leftFootY):F2}, RH-RF: {Mathf.Abs(rightHandY - rightFootY):F2}");
 
         if (idlecheck && inCrawlRange)
@@ -237,25 +238,26 @@ public class FullBodyCtrl : MonoBehaviour
             }
         }
 
-        // Crouch
-        if (idlecheck && Mathf.Abs(rightHandY - rightFootY) < 0.05f &&
-            yDiff >= crouchThreshold && !crouchTriggered)
-        {
-            animator.SetTrigger("Crouch Start");
-            cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
-            isCrouching = true;
-            crouchTriggered = true;
-            Debug.Log("Crouch Start");
-        }
+        // hmd의 y값이 아바타를 따라오지 않기 때문에 애니메이션을 틀 필요가 없어보임
+        // // Crouch
+        // if (idlecheck && Mathf.Abs(rightHandY - rightFootY) < 0.05f &&
+        //     yDiff >= crouchThreshold && !crouchTriggered)
+        // {
+        //     animator.SetTrigger("Crouch Start");
+        //     cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
+        //     isCrouching = true;
+        //     crouchTriggered = true;
+        //     Debug.Log("Crouch Start");
+        // }
 
-        if (isCrouching && rightHandY - rightFootY > crouchThreshold && crouchTriggered) 
-        {
-            animator.SetTrigger("Crouch End");
-            cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
-            isCrouching = false;
-            crouchTriggered = false;
-            Debug.Log("Crouch End");
-        }
+        // if (isCrouching && rightHandY - rightFootY > crouchThreshold && crouchTriggered) 
+        // {
+        //     animator.SetTrigger("Crouch End");
+        //     cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
+        //     isCrouching = false;
+        //     crouchTriggered = false;
+        //     Debug.Log("Crouch End");
+        // }
 
         // Walk & Run
         if (leftHandY < walkThreshold && rightHandY < walkThreshold)

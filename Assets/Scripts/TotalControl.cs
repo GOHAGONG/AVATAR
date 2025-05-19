@@ -49,8 +49,12 @@ public class TotalControl : MonoBehaviour
     private SteamVR_Input_Sources? activeHand = null;
     public SteamVR_Behaviour_Pose leftHandPose;
     public SteamVR_Behaviour_Pose rightHandPose;
-    private Vector3 prevLeftPos;
-    private Vector3 prevRightPos;
+    public SteamVR_Behaviour_Pose leftFootPose;
+    public SteamVR_Behaviour_Pose rightFootPose;
+    private Vector3 prevLeftHandPos;
+    private Vector3 prevRightHandPos;
+    private Vector3 prevLeftFootPos;
+    private Vector3 prevRightFootPos;
     private float leftSwingAmount;
     private float rightSwingAmount;
 
@@ -76,6 +80,9 @@ public class TotalControl : MonoBehaviour
     public bool isWalkThreshold;
     public float runThreshold;
 
+    [Header("Scripts 참조")]
+    public CameraRigAligner cameraRigAligner;
+
     [Header("Movement")]
     public float moveSpeed = 0f;
     public float jumpForce = 0f;
@@ -96,8 +103,8 @@ public class TotalControl : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
 
-        prevLeftPos = leftHandPose.transform.position;
-        prevRightPos = rightHandPose.transform.position;
+        prevLeftHandPos = leftHandPose.transform.position;
+        prevRightHandPos = rightHandPose.transform.position;
     }
 
     // Update is called once per frame
@@ -139,27 +146,37 @@ public class TotalControl : MonoBehaviour
 
 
         // For Half Body
-        Vector3 leftVel = leftHandPose.GetVelocity();
-        Vector3 rightVel = rightHandPose.GetVelocity();
+        Vector3 leftHandVel = leftHandPose.GetVelocity();
+        Vector3 rightHandVel = rightHandPose.GetVelocity();
+        Vector3 leftFootVel = leftFootPose.GetVelocity();
+        Vector3 rightFootVel = rightFootPose.GetVelocity();
 
-        float leftForward = Vector3.Dot(transform.forward, leftVel);
-        float rightForward = Vector3.Dot(transform.forward, rightVel);
+        float leftHandForward = Vector3.Dot(transform.forward, leftHandVel);
+        float rightHandForward = Vector3.Dot(transform.forward, rightHandVel);
+        float leftFootForward = Vector3.Dot(transform.forward, leftFootVel);
+        float rightFootForward = Vector3.Dot(transform.forward, rightFootVel);
 
-        float avgSpeed = (Mathf.Abs(leftForward) + Mathf.Abs(rightForward)) / 2f;
+        float avgHandSpeed = (Mathf.Abs(leftHandForward) + Mathf.Abs(rightHandForward)) / 2f;
+        float avgFootSpeed = (Mathf.Abs(leftFootForward) + Mathf.Abs(rightFootForward)) / 2f;
 
-        bool handsAreCrossing = (leftForward > 0.05f && rightForward < -0.05f) ||
-                                (leftForward < -0.05f && rightForward > 0.05f);
+        bool handsAreCrossing = (leftHandForward > 0.05f && rightHandForward < -0.05f) ||
+                                (leftHandForward < -0.05f && rightHandForward > 0.05f);
+        bool feetAreCrossing = (leftFootForward > 0.05f && rightFootForward < -0.05f) ||
+                                (leftFootForward < -0.05f && rightFootForward > 0.05f);
 
-        float leftY = leftHandPose.transform.position.y;
-        float rightY = rightHandPose.transform.position.y;
-        float yDiff = Mathf.Abs(leftY - rightY);
+        float leftHandY = leftHandPose.transform.position.y;
+        float rightHandY = rightHandPose.transform.position.y;
+        float leftFootY = leftFootPose.transform.position.y;
+        float rightFootY = rightFootPose.transform.position.y;
+        float yDiff = Mathf.Abs(leftHandY - rightHandY);
 
         bool idlecheck = !isJumping && !isCrawling && !isCrouching && !isWalking && !isWalking;
 
 
 
         // Walk & Run
-        if (WalkMethod == CustomMethod.Controller) {
+        if (WalkMethod == CustomMethod.Controller)
+        {
             if (activeHand != null && !isJumping)
             {
                 // 이동벡터 계산
@@ -177,8 +194,9 @@ public class TotalControl : MonoBehaviour
                 isRunning = false;
             }
         }
-        else if(WalkMethod == CustomMethod.HalfBody) {
-            if (leftY < walkThreshold && rightY < walkThreshold)
+        else if (WalkMethod == CustomMethod.HalfBody)
+        {
+            if (leftHandY < walkThreshold && rightHandY < walkThreshold)
                 isWalkThreshold = true;
             else isWalkThreshold = false;
 
@@ -187,10 +205,10 @@ public class TotalControl : MonoBehaviour
                 if (isWalkThreshold)
                 {
                     // 타이머 업데이트
-                    if (handsAreCrossing && avgSpeed > 0.05f)
+                    if (handsAreCrossing && avgHandSpeed > 0.05f)
                     {
                         // 조건 만족했을 때만 타이머 리셋
-                        if (avgSpeed >= runThreshold)
+                        if (avgHandSpeed >= runThreshold)
                         {
                             runTimer = runHoldTime;
                         }
@@ -220,11 +238,52 @@ public class TotalControl : MonoBehaviour
                 }
             }
         }
-        else { }
+        else
+        {
+            if (leftHandY < walkThreshold && rightHandY < walkThreshold)
+                isWalkThreshold = true;
+            else isWalkThreshold = false;
+
+            if (!isCrawling && !isCrouching && !isJumping)
+            {
+                if (isWalkThreshold)
+                {
+                    // 타이머 업데이트
+                    if (handsAreCrossing && avgHandSpeed > 0.05f && feetAreCrossing && avgFootSpeed > 0.05f)
+                    {
+                        // 조건 만족했을 때만 타이머 리셋
+                        if (avgFootSpeed >= 0.9f)
+                        {
+                            runTimer = runHoldTime;
+                        }
+                        else
+                        {
+                            walkTimer = walkHoldTime;
+                        }
+                    }
+
+                    // 타이머 감소
+                    if (walkTimer > 0)
+                        walkTimer -= Time.deltaTime;
+                    if (runTimer > 0)
+                        runTimer -= Time.deltaTime;
+
+                    // 상태 판단
+                    isRunning = runTimer > 0f;
+                    isWalking = walkTimer > 0f;
+                }
+                else
+                {
+                    isRunning = false;
+                    isWalking = false;
+                }
+            }
+        }
 
 
         // Crouch
-        if (CrouchMethod == CustomMethod.Controller) {
+        if (CrouchMethod == CustomMethod.Controller)
+        {
             if (!isCrawling && crouchAction.GetStateDown(rightInputSource))
             {
                 animator.SetTrigger("Crouch Start");
@@ -261,7 +320,8 @@ public class TotalControl : MonoBehaviour
                 filpLeft = false;
             }
         }
-        else if (CrouchMethod == CustomMethod.HalfBody) {
+        else if (CrouchMethod == CustomMethod.HalfBody)
+        {
             if (idlecheck && yDiff >= crouchThreshold && !crouchTriggered)
             {
                 animator.SetTrigger("Crouch Start");
@@ -278,7 +338,7 @@ public class TotalControl : MonoBehaviour
                 Debug.Log("Crouch End");
             }
 
-            Debug.Log("leftY: " + leftY);
+            // Debug.Log("leftY: " + leftHandY);
         }
         else { }
         
@@ -315,12 +375,12 @@ public class TotalControl : MonoBehaviour
             }
         }
         else if (JumpMethod == CustomMethod.HalfBody) {
-            if (idlecheck && leftY >= jumpThreshold && rightY >= jumpThreshold)
+            if (idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold)
             {
                 isJumping = true;
                 animator.SetTrigger("Jump Prepare");
             }
-            if (isJumping && leftY < jumpExitThreshold && rightY < jumpExitThreshold)
+            if (isJumping && leftHandY < jumpExitThreshold && rightHandY < jumpExitThreshold)
             {
                 animator.SetTrigger("Jump Execute");
                 velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
@@ -332,7 +392,8 @@ public class TotalControl : MonoBehaviour
 
 
         // Crawl
-        if (CrawlMethod == CustomMethod.Controller) {
+        if (CrawlMethod == CustomMethod.Controller)
+        {
             if (!isCrouching && crawlAction.GetStateDown(leftInputSource))
             {
                 Debug.Log("Crawl Left Triggered");
@@ -379,9 +440,10 @@ public class TotalControl : MonoBehaviour
                 isCrawling = false;
             }
         }
-        else if (CrawlMethod == CustomMethod.HalfBody) {
-            bool inCrawlRange = leftY > crawlThreshold1 && leftY < crawlThreshold2 &&
-                                rightY > crawlThreshold1 && rightY < crawlThreshold2;
+        else if (CrawlMethod == CustomMethod.HalfBody)
+        {
+            bool inCrawlRange = leftHandY > crawlThreshold1 && leftHandY < crawlThreshold2 &&
+                                rightHandY > crawlThreshold1 && rightHandY < crawlThreshold2;
             if (idlecheck && inCrawlRange)
             {
                 crawlConditionTimer += Time.deltaTime; // 조건 만족 중 → 타이머 증가
@@ -407,8 +469,89 @@ public class TotalControl : MonoBehaviour
             if (isCrawling)
             {
                 // 타이머 업데이트
-                if (handsAreCrossing && avgSpeed > 0.05f)
+                if (handsAreCrossing && avgHandSpeed > 0.05f)
                 {
+                    // // 조건 만족했을 때만 타이머 리셋
+                    // if (avgSpeed >= 0.4f)
+                    // {
+                    // runTimer = runHoldTime;
+                    // }
+                    // else
+                    // {
+                    walkTimer = walkHoldTime;
+                    // }
+                }
+
+                // 타이머 감소
+                if (walkTimer > 0)
+                    walkTimer -= Time.deltaTime;
+                // if(runTimer > 0)
+                // runTimer -= Time.deltaTime;
+
+                // 상태 판단
+                // isRunning = runTimer > 0f;
+                isWalking = (isCrawling && walkTimer > 0f);
+            }
+
+            // if (isCrawling && ((leftY < crawlThreshold3 && rightY < crawlThreshold3) || (leftY > crawlThreshold4 && rightY > crawlThreshold4)) )
+            // {
+            //     animator.SetTrigger("Crawl End");
+            //     isCrawling = false;
+            // }
+
+            if (isCrawling && !isCrawlingProtected)
+            {
+                float leftDelta = Mathf.Abs(leftHandY - crawlStartLeftY);
+                float rightDelta = Mathf.Abs(rightHandY - crawlStartRightY);
+
+                // Debug.Log("left Delta: " + leftDelta);
+
+                if (leftDelta > crawlExitDelta && rightDelta > crawlExitDelta)
+                {
+                    //Debug.Log("Crawl End triggered by movement delta");
+                    animator.SetTrigger("Crawl End");
+                    isCrawling = false;
+                }
+            }
+        }
+        else
+        {
+            bool inCrawlRange = Mathf.Abs(leftHandY - leftFootY) < 0.1f &&
+                                Mathf.Abs(rightHandY - rightFootY) < 0.1f;
+            // Debug.Log($"Crawl Check | LH-LF: {Mathf.Abs(leftHandY - leftFootY):F2}, RH-RF: {Mathf.Abs(rightHandY - rightFootY):F2}");
+
+            if (idlecheck && inCrawlRange)
+            {
+                crawlConditionTimer += Time.deltaTime; // 조건 만족 중 → 타이머 증가
+
+                if (crawlConditionTimer >= crawlHoldTimeRequired && !isCrawling)
+                    {
+                        animator.SetTrigger("Crawl Start");
+                        isCrawling = true;
+                        // cameraRigAligner.rootOffset = new Vector3(
+                        //     cameraRigAligner.rootOffset.x,
+                        //     0f,
+                        //     cameraRigAligner.rootOffset.z
+                        // );
+                        cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
+
+                        // 보호 타이머 시작 
+                        // 애니메이션 재생동안 Crawl Exit Delta 계산하지 않도록
+                        StartCoroutine(CrawlProtectionDelay(2.0f));
+
+                        crawlConditionTimer = 0f; // 초기화
+                    }
+            }
+            else
+            {
+                crawlConditionTimer = 0f; // 범위 벗어나면 타이머 리셋
+            }
+
+            if(isCrawling){
+                // 타이머 업데이트
+                if (handsAreCrossing && avgHandSpeed > 0.05f)
+                {
+                    Debug.Log("isCrawling true");
                     // // 조건 만족했을 때만 타이머 리셋
                     // if (avgSpeed >= 0.4f)
                     // {
@@ -439,20 +582,25 @@ public class TotalControl : MonoBehaviour
 
             if (isCrawling && !isCrawlingProtected)
             {
-                float leftDelta = Mathf.Abs(leftY - crawlStartLeftY);
-                float rightDelta = Mathf.Abs(rightY - crawlStartRightY);
+                float leftDelta = Mathf.Abs(leftHandY - crawlStartLeftY);
+                float rightDelta = Mathf.Abs(rightHandY - crawlStartRightY);
 
-                Debug.Log("left Delta: " + leftDelta);
+                // Debug.Log("left Delta: " + leftDelta);
 
                 if (leftDelta > crawlExitDelta && rightDelta > crawlExitDelta)
                 {
                     //Debug.Log("Crawl End triggered by movement delta");
                     animator.SetTrigger("Crawl End");
                     isCrawling = false;
+                    // cameraRigAligner.rootOffset = new Vector3(
+                    //     cameraRigAligner.rootOffset.x,
+                    //     1f,
+                    //     cameraRigAligner.rootOffset.z
+                    // );
+                    cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
                 }
             }
         }
-        else { }
 
         // Animator 연동
         if (animator != null)
