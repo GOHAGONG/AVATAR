@@ -91,7 +91,7 @@ public class KeyboardCtrl : MonoBehaviour
             isCrouching = false;
         }
 
-        // Crawl (Left Shift)
+/*        // Crawl (Left Shift)
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             Debug.Log("Crawl action triggered!");
@@ -103,7 +103,7 @@ public class KeyboardCtrl : MonoBehaviour
         {
             animator.SetTrigger("Crawl End");
             isCrawling = false;
-        }
+        }*/
 
         // (Optional) Throw action placeholder (if needed)
         if (Input.GetKeyUp(KeyCode.T) && isThrowing)

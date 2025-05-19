@@ -11,7 +11,11 @@ public class CrawlColliderController : MonoBehaviour
     public float crawlHeight = 1.0f;
     public Vector3 crawlCenter = new Vector3(0f, 0.5f, 0f);
 
-    private bool isCrawling = false;
+    public bool isCrawling = false;
+    public float checkRadius = 1.2f;
+    public Transform headCheck;
+    public LayerMask ceilingMask;
+    public bool canStand = true;
 
     [Header("Animation (Optional)")]
     public Animator animator;
@@ -25,7 +29,9 @@ public class CrawlColliderController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        canStand = Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !isCrawling)
         {
             StartCrawl();
         }
@@ -38,8 +44,9 @@ public class CrawlColliderController : MonoBehaviour
             }
             else
             {
+                isCrawling = true;
                 animator.SetBool("isCrawling", true);
-                Debug.Log("Cannot stand up: ceiling too low. Staying in crawl.");
+                /*Debug.Log("Cannot stand up: ceiling too low. Staying in crawl.");*/
             }
         }
     }
@@ -58,6 +65,7 @@ public class CrawlColliderController : MonoBehaviour
 
     void StopCrawl()
     {
+        Debug.Log("스탑 크롤");
         isCrawling = false;
         controller.height = originalHeight;
         controller.center = originalCenter;
@@ -70,14 +78,18 @@ public class CrawlColliderController : MonoBehaviour
 
     bool CanStandUp()
     {
-        float radius = controller.radius;
-        float checkDistance = originalHeight / 2f;
-        Vector3 start = transform.position + Vector3.up * crawlCenter.y;
-        Vector3 end = transform.position + Vector3.up * (checkDistance + 0.1f); // 약간 여유
+        return !Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
+    }
 
-        // 환경 레이어 (Ground나 Environment 등) 설정에 맞게 변경
-        int layerMask = LayerMask.GetMask("Celling");
-
-        return !Physics.CheckCapsule(start, end, radius, layerMask);
+    /// <summary>
+    /// CheckCapsule 디버깅용 sphere 그리기
+    /// </summary>
+    void OnDrawGizmosSelected()
+    {
+        if (headCheck != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(headCheck.position, checkRadius);
+        }
     }
 }
