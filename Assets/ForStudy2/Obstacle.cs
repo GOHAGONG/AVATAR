@@ -31,6 +31,7 @@ public class Obstacle : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+/*        Debug.Log("충돌 감지");*/
         if (isHit) return;
 
         if (other.CompareTag("Player"))

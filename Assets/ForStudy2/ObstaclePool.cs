@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ObstaclePool : MonoBehaviour
 {
-    public GameObject obstaclePrefab;
+    public GameObject[] obstaclePrefabs; // 여러 프리팹
     public int poolSize = 5;
 
     private Queue<GameObject> pool = new Queue<GameObject>();
@@ -12,7 +12,8 @@ public class ObstaclePool : MonoBehaviour
     {
         for (int i = 0; i < poolSize; i++)
         {
-            GameObject obj = Instantiate(obstaclePrefab);
+            GameObject prefab = GetRandomPrefab();
+            GameObject obj = Instantiate(prefab);
             obj.SetActive(false);
             pool.Enqueue(obj);
         }
@@ -27,14 +28,19 @@ public class ObstaclePool : MonoBehaviour
             return obj;
         }
 
-        // 풀 초과 시 새로 생성 (옵션)
-        GameObject newObj = Instantiate(obstaclePrefab);
-        return newObj;
+        GameObject prefab = GetRandomPrefab();
+        return Instantiate(prefab);
     }
 
     public void ReturnToPool(GameObject obj)
     {
         obj.SetActive(false);
         pool.Enqueue(obj);
+    }
+
+    private GameObject GetRandomPrefab()
+    {
+        if (obstaclePrefabs.Length == 0) return null;
+        return obstaclePrefabs[Random.Range(0, obstaclePrefabs.Length)];
     }
 }

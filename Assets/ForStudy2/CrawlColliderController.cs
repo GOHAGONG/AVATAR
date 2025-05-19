@@ -65,7 +65,6 @@ public class CrawlColliderController : MonoBehaviour
 
     void StopCrawl()
     {
-        Debug.Log("스탑 크롤");
         isCrawling = false;
         controller.height = originalHeight;
         controller.center = originalCenter;
