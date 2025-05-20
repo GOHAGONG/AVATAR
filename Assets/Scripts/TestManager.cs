@@ -34,11 +34,11 @@ public class TestManager : MonoBehaviour
     public ActionType currentAction;
     public ControlType currentControl;
     
-    public GameObject Target;
     
     private List<ActionType> currentTrialSequence;
     private int currentTrialIndex = 0;
     public TestState currentState = TestState.WaitingForActionComplete;
+    public GameObject Target;
 
     [Header("UI")]
     public TMP_Text ControlTypeUI;
@@ -60,10 +60,13 @@ public class TestManager : MonoBehaviour
 
     private void Update()
     {
+        // ControlType Canvas 적용 
+        UpdateControlTypeUI();
+
         // Enter 누르면 NASA&FMS 설문 or 다음 동작 수행
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            Debug.Log("Enter");
+            // Debug.Log("Enter");
             TryTransitionToSurvey();
         }
     }

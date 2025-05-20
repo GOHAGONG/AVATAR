@@ -57,10 +57,10 @@ public class CrawlColliderController : MonoBehaviour
         controller.height = crawlHeight;
         controller.center = crawlCenter;
 
-        if (animator != null)
-        {
-            animator.SetTrigger("Crawl Start");
-        }
+        // if (animator != null)
+        // {
+        //     animator.SetTrigger("Crawl Start");
+        // }
     }
 
     void StopCrawl()
@@ -69,10 +69,10 @@ public class CrawlColliderController : MonoBehaviour
         controller.height = originalHeight;
         controller.center = originalCenter;
 
-        if (animator != null)
-        {
-            animator.SetTrigger("Crawl End");
-        }
+        // if (animator != null)
+        // {
+        //     animator.SetTrigger("Crawl End");
+        // }
     }
 
     bool CanStandUp()
@@ -81,7 +81,7 @@ public class CrawlColliderController : MonoBehaviour
     }
 
     /// <summary>
-    /// CheckCapsule µð¹ö±ë¿ë sphere ±×¸®±â
+    /// CheckCapsule ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ sphere ï¿½×¸ï¿½ï¿½ï¿½
     /// </summary>
     void OnDrawGizmosSelected()
     {

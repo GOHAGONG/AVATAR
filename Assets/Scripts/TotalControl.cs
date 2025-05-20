@@ -36,6 +36,13 @@ public class TotalControl : MonoBehaviour
     public float groundDistance = 0.1f;
     public LayerMask groundMask;
 
+    [Header("Ceiling Check (for Crawl)")]
+    public Transform headCheck;
+    public float checkRadius = 1.2f;
+    public LayerMask ceilingMask;
+    public bool canStand = true;
+
+
     [Header("Animation")]
     public Animator animator;
 
@@ -47,6 +54,7 @@ public class TotalControl : MonoBehaviour
     public SteamVR_Input_Sources leftInputSource = SteamVR_Input_Sources.LeftHand;
     public SteamVR_Input_Sources rightInputSource = SteamVR_Input_Sources.RightHand;
     private SteamVR_Input_Sources? activeHand = null;
+    public Transform headPos;
     public SteamVR_Behaviour_Pose leftHandPose;
     public SteamVR_Behaviour_Pose rightHandPose;
     public SteamVR_Behaviour_Pose leftFootPose;
@@ -58,6 +66,13 @@ public class TotalControl : MonoBehaviour
     private float leftSwingAmount;
     private float rightSwingAmount;
 
+    [Header("For crawlcolider control")]
+    public float originalHeight;
+    private Vector3 originalCenter;
+    public float crawlHeight = 1.0f;
+    public Vector3 crawlCenter = new Vector3(0f, 0.5f, 0f);
+
+
     [Header("Components")]
     private CharacterController controller;
     private Vector3 velocity;
@@ -65,6 +80,7 @@ public class TotalControl : MonoBehaviour
     public bool isCrouching = false;
     public bool isWalking = false;
     public bool isRunning = false;
+    public bool isJumpPrepared = false;
     public bool isJumping = false;
     public bool isCrawling = false;
     public bool filpLeft = false;
@@ -97,6 +113,7 @@ public class TotalControl : MonoBehaviour
     private float crawlStartRightY;
     public float crawlExitDelta = 1.3f; // 탈출 기준 변화량 (0.3 이상이면 종료)
     private bool isCrawlingProtected = false; // 크롤 시작 보호 플래그
+    public bool isJumpingProtected = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -105,6 +122,10 @@ public class TotalControl : MonoBehaviour
 
         prevLeftHandPos = leftHandPose.transform.position;
         prevRightHandPos = rightHandPose.transform.position;
+
+        // for crawl collider control
+        originalHeight = controller.height;
+        originalCenter = controller.center;
     }
 
     // Update is called once per frame
@@ -164,6 +185,7 @@ public class TotalControl : MonoBehaviour
         bool feetAreCrossing = (leftFootForward > 0.05f && rightFootForward < -0.05f) ||
                                 (leftFootForward < -0.05f && rightFootForward > 0.05f);
 
+        float headY = headPos.transform.position.y;
         float leftHandY = leftHandPose.transform.position.y;
         float rightHandY = rightHandPose.transform.position.y;
         float leftFootY = leftFootPose.transform.position.y;
@@ -205,7 +227,7 @@ public class TotalControl : MonoBehaviour
                 if (isWalkThreshold)
                 {
                     // 타이머 업데이트
-                    if (handsAreCrossing && avgHandSpeed > 0.05f)
+                    if (handsAreCrossing && avgHandSpeed > 0.1f)
                     {
                         // 조건 만족했을 때만 타이머 리셋
                         if (avgHandSpeed >= runThreshold)
@@ -340,11 +362,33 @@ public class TotalControl : MonoBehaviour
 
             // Debug.Log("leftY: " + leftHandY);
         }
-        else { }
-        
+        else
+        {
+            if (idlecheck && (headY - leftFootY) < 1.2f && (headY - leftFootY) > 0.8f &&
+                /* Mathf.Abs(rightHandY - leftFootY) < 0.1f && Mathf.Abs(leftHandY - leftFootY) > 0.3f && */ !crouchTriggered)
+            {
+                animator.SetTrigger("Crouch Start");
+                // cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
+                isCrouching = true;
+                crouchTriggered = true;
+                Debug.Log("Crouch Start");
+            }
+
+            if (isCrouching && ((headY - leftFootY) > 1.3f || (headY - leftFootY) < 0.7f) &&
+                /* (rightHandY - leftFootY) > crouchThreshold && */ crouchTriggered)
+            {
+                animator.SetTrigger("Crouch End");
+                // cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
+                isCrouching = false;
+                crouchTriggered = false;
+                Debug.Log("Crouch End");
+            }
+        }
+
 
         // Jump
-        if (JumpMethod == CustomMethod.Controller) {
+        if (JumpMethod == CustomMethod.Controller)
+        {
             bool leftPressed = jumpAction.GetStateDown(leftInputSource);
             bool rightPressed = jumpAction.GetStateDown(rightInputSource);
 
@@ -374,7 +418,8 @@ public class TotalControl : MonoBehaviour
                 isJumping = false;
             }
         }
-        else if (JumpMethod == CustomMethod.HalfBody) {
+        else if (JumpMethod == CustomMethod.HalfBody)
+        {
             if (idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold)
             {
                 isJumping = true;
@@ -388,15 +433,79 @@ public class TotalControl : MonoBehaviour
                 isJumping = false;
             }
         }
-        else { }
+        else
+        {
+            if (!isJumpPrepared && idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold)
+            {
+                animator.SetTrigger("Jump Prepare");
+                isJumpPrepared = true;
+            }
+
+            if (isJumpPrepared && leftFootY > 0.3f && rightFootY > 0.3f)
+            {
+                isJumpPrepared = false;
+                animator.SetTrigger("Jump Execute");
+                isJumping = true;
+                Debug.Log("Jump executed!");
+                velocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
+                StartCoroutine(JumpProtectionDelay(1.2f));
+            }
+
+            if (!isJumping && isJumpPrepared && !isJumpingProtected && leftHandY < jumpExitThreshold && rightHandY < jumpExitThreshold)
+            {
+                isJumpPrepared = false;
+                animator.SetTrigger("Jump Cancel");
+                Debug.Log("Jump canceled!");
+            }
+        }
 
 
         // Crawl
+
+        //Check Ceiling
+        //when Crawling, collider of banana man shoud shrink to crwaling size of man 
+
+        // check can stand when crawling
+        canStand = Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
+
+        // when starting crawling, collder 
+        void StartCrawl()
+        {
+            isCrawling = true;
+            controller.height = crawlHeight;
+            controller.center = crawlCenter;
+        }
+
+        // when stoping crawling == stand up
+        void StopCrawl()
+        {
+            isCrawling = false;
+            controller.height = originalHeight;
+            controller.center = originalCenter;
+        }
+
+        // function for checking there is ceiling upside
+        bool CanStandUp()
+        {
+            return !Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
+        }
+
+        // For DEBUG, draw red circle checking there is ceiling object above head
+        void OnDrawGizmosSelected()
+        {
+            if (headCheck != null)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(headCheck.position, checkRadius);
+            }
+        }
+
         if (CrawlMethod == CustomMethod.Controller)
         {
-            if (!isCrouching && crawlAction.GetStateDown(leftInputSource))
+            if (!isCrouching && crawlAction.GetStateDown(leftInputSource) && !isCrawling)
             {
                 Debug.Log("Crawl Left Triggered");
+                StartCrawl();
                 animator.SetTrigger("Crawl Start");
                 isCrawling = true;
 
@@ -406,6 +515,7 @@ public class TotalControl : MonoBehaviour
             if (!isCrouching && crawlAction.GetStateDown(rightInputSource))
             {
                 Debug.Log("Crawl Right Triggered");
+                StartCrawl();
                 animator.SetTrigger("Crawl Start");
                 isCrawling = true;
 
@@ -413,6 +523,7 @@ public class TotalControl : MonoBehaviour
                     activeHand = leftInputSource;
             }
 
+            //HBD & FBD crawl and walk
             if (WalkMethod != CustomMethod.Controller)
             {
                 if (activeHand != null && !isJumping && isCrawling)
@@ -436,6 +547,7 @@ public class TotalControl : MonoBehaviour
             if ((crawlAction.GetStateUp(leftInputSource) && isCrawling) ||
                 (crawlAction.GetStateUp(rightInputSource) && isCrawling))
             {
+                StopCrawl();
                 animator.SetTrigger("Crawl End");
                 isCrawling = false;
             }
@@ -451,6 +563,7 @@ public class TotalControl : MonoBehaviour
                 if (crawlConditionTimer >= crawlHoldTimeRequired && !isCrawling)
                 {
                     //Debug.Log("Crawl Triggered after Hold");
+                    StartCrawl();
                     animator.SetTrigger("Crawl Start");
                     isCrawling = true;
 
@@ -509,6 +622,7 @@ public class TotalControl : MonoBehaviour
                 if (leftDelta > crawlExitDelta && rightDelta > crawlExitDelta)
                 {
                     //Debug.Log("Crawl End triggered by movement delta");
+                    StopCrawl();
                     animator.SetTrigger("Crawl End");
                     isCrawling = false;
                 }
@@ -516,38 +630,39 @@ public class TotalControl : MonoBehaviour
         }
         else
         {
-            bool inCrawlRange = Mathf.Abs(leftHandY - leftFootY) < 0.1f &&
-                                Mathf.Abs(rightHandY - rightFootY) < 0.1f;
+            // bool inCrawlRange = (headY - leftFootY) < 0.3f;
             // Debug.Log($"Crawl Check | LH-LF: {Mathf.Abs(leftHandY - leftFootY):F2}, RH-RF: {Mathf.Abs(rightHandY - rightFootY):F2}");
 
-            if (idlecheck && inCrawlRange)
+            if (idlecheck && headY < 0.6f/* && leftHandY < 0.2f && rightHandY < 0.2f */)
             {
                 crawlConditionTimer += Time.deltaTime; // 조건 만족 중 → 타이머 증가
 
                 if (crawlConditionTimer >= crawlHoldTimeRequired && !isCrawling)
-                    {
-                        animator.SetTrigger("Crawl Start");
-                        isCrawling = true;
-                        // cameraRigAligner.rootOffset = new Vector3(
-                        //     cameraRigAligner.rootOffset.x,
-                        //     0f,
-                        //     cameraRigAligner.rootOffset.z
-                        // );
-                        cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
+                {
+                    StartCrawl();
+                    animator.SetTrigger("Crawl Start");
+                    isCrawling = true;
+                    cameraRigAligner.rootOffset = new Vector3(
+                        cameraRigAligner.rootOffset.x,
+                        0f,
+                        cameraRigAligner.rootOffset.z
+                    );
+                    cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
 
-                        // 보호 타이머 시작 
-                        // 애니메이션 재생동안 Crawl Exit Delta 계산하지 않도록
-                        StartCoroutine(CrawlProtectionDelay(2.0f));
+                    // 보호 타이머 시작 
+                    // 애니메이션 재생동안 Crawl Exit Delta 계산하지 않도록
+                    StartCoroutine(CrawlProtectionDelay(2.0f));
 
-                        crawlConditionTimer = 0f; // 초기화
-                    }
+                    crawlConditionTimer = 0f; // 초기화
+                }
             }
             else
             {
                 crawlConditionTimer = 0f; // 범위 벗어나면 타이머 리셋
             }
 
-            if(isCrawling){
+            if (isCrawling)
+            {
                 // 타이머 업데이트
                 if (handsAreCrossing && avgHandSpeed > 0.05f)
                 {
@@ -555,19 +670,19 @@ public class TotalControl : MonoBehaviour
                     // // 조건 만족했을 때만 타이머 리셋
                     // if (avgSpeed >= 0.4f)
                     // {
-                        // runTimer = runHoldTime;
+                    // runTimer = runHoldTime;
                     // }
                     // else
                     // {
-                        walkTimer = walkHoldTime;
+                    walkTimer = walkHoldTime;
                     // }
                 }
 
                 // 타이머 감소
-                if(walkTimer > 0)
+                if (walkTimer > 0)
                     walkTimer -= Time.deltaTime;
                 // if(runTimer > 0)
-                    // runTimer -= Time.deltaTime;
+                // runTimer -= Time.deltaTime;
 
                 // 상태 판단
                 // isRunning = runTimer > 0f;
@@ -582,21 +697,22 @@ public class TotalControl : MonoBehaviour
 
             if (isCrawling && !isCrawlingProtected)
             {
-                float leftDelta = Mathf.Abs(leftHandY - crawlStartLeftY);
-                float rightDelta = Mathf.Abs(rightHandY - crawlStartRightY);
+                // float leftDelta = Mathf.Abs(leftHandY - crawlStartLeftY);
+                // float rightDelta = Mathf.Abs(rightHandY - crawlStartRightY);
 
                 // Debug.Log("left Delta: " + leftDelta);
 
-                if (leftDelta > crawlExitDelta && rightDelta > crawlExitDelta)
+                if (headY > 0.5f)
                 {
                     //Debug.Log("Crawl End triggered by movement delta");
+                    StopCrawl();
                     animator.SetTrigger("Crawl End");
                     isCrawling = false;
-                    // cameraRigAligner.rootOffset = new Vector3(
-                    //     cameraRigAligner.rootOffset.x,
-                    //     1f,
-                    //     cameraRigAligner.rootOffset.z
-                    // );
+                    cameraRigAligner.rootOffset = new Vector3(
+                        cameraRigAligner.rootOffset.x,
+                        1f,
+                        cameraRigAligner.rootOffset.z
+                    );
                     cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
                 }
             }
@@ -622,5 +738,12 @@ public class TotalControl : MonoBehaviour
         crawlStartLeftY = leftHandPose.transform.position.y; // leftY
         crawlStartRightY = rightHandPose.transform.position.y; // rightY
         Debug.Log("Crawl Start");
+    }
+    private IEnumerator JumpProtectionDelay(float delay)
+    {
+        isJumpingProtected = true;
+        yield return new WaitForSeconds(delay);
+        isJumpingProtected = false;
+        isJumping = false;
     }
 }
