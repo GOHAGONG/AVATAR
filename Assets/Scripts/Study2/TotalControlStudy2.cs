@@ -2,27 +2,27 @@ using UnityEngine;
 using System.Collections;
 using Valve.VR;
 
-public enum CurrentMethod { Controller, HalfBody, FullBody, Customize }
-public enum CustomMethod { Controller, HalfBody, FullBody }
+public enum Current2Method { Controller, HalfBody, FullBody, Customize }
+public enum Custom2Method { Controller, HalfBody, FullBody }
 
-public class TotalControl : MonoBehaviour
+public class TotalControlStudy2 : MonoBehaviour
 {
     [Header("Select Method")]
     [SerializeField]
-    public CurrentMethod SelectedMethod = CurrentMethod.Controller;
+    public Current2Method SelectedMethod = Current2Method.Controller;
 
     [Header("Customize Method")]
     [SerializeField]
-    public CustomMethod WalkMethod;
-    public CustomMethod CrouchMethod;
-    public CustomMethod JumpMethod;
-    public CustomMethod CrawlMethod;
+    public Custom2Method WalkMethod;
+    public Custom2Method CrouchMethod;
+    public Custom2Method JumpMethod;
+    public Custom2Method CrawlMethod;
 
     private void OnValidate()
     {
-        if (SelectedMethod != CurrentMethod.Customize)
+        if (SelectedMethod != Current2Method.Customize)
         {
-            var method = (CustomMethod)SelectedMethod;
+            var method = (Custom2Method)SelectedMethod;
             WalkMethod = method;
             CrouchMethod = method;
             JumpMethod = method;
@@ -97,7 +97,8 @@ public class TotalControl : MonoBehaviour
     public float runThreshold;
 
     [Header("Scripts 참조")]
-    public CameraRigAligner cameraRigAligner;
+    public CameraRigAlignerStudy2 cameraRigAlignerStudy2;
+    public Test2Manager test2Manager;
 
     [Header("Movement")]
     public float moveSpeed = 0f;
@@ -197,8 +198,9 @@ public class TotalControl : MonoBehaviour
 
 
         // Walk & Run
-        if (WalkMethod == CustomMethod.Controller)
+        if (WalkMethod == Custom2Method.Controller)
         {
+            UpdateControlTypeUI("Controller");
             if (activeHand != null && !isJumping)
             {
                 // 이동벡터 계산
@@ -216,8 +218,9 @@ public class TotalControl : MonoBehaviour
                 isRunning = false;
             }
         }
-        else if (WalkMethod == CustomMethod.HalfBody)
+        else if (WalkMethod == Custom2Method.HalfBody)
         {
+            UpdateControlTypeUI("Half Body");
             if (leftHandY < walkThreshold && rightHandY < walkThreshold)
                 isWalkThreshold = true;
             else isWalkThreshold = false;
@@ -262,6 +265,7 @@ public class TotalControl : MonoBehaviour
         }
         else
         {
+            UpdateControlTypeUI("Full Body");
             if (leftHandY < walkThreshold && rightHandY < walkThreshold)
                 isWalkThreshold = true;
             else isWalkThreshold = false;
@@ -304,8 +308,9 @@ public class TotalControl : MonoBehaviour
 
 
         // Crouch
-        if (CrouchMethod == CustomMethod.Controller)
+        if (CrouchMethod == Custom2Method.Controller)
         {
+            UpdateControlTypeUI("Controller");
             if (!isCrawling && crouchAction.GetStateDown(rightInputSource))
             {
                 animator.SetTrigger("Crouch Start");
@@ -342,8 +347,9 @@ public class TotalControl : MonoBehaviour
                 filpLeft = false;
             }
         }
-        else if (CrouchMethod == CustomMethod.HalfBody)
+        else if (CrouchMethod == Custom2Method.HalfBody)
         {
+            UpdateControlTypeUI("Half Body");
             if (idlecheck && yDiff >= crouchThreshold && !crouchTriggered)
             {
                 animator.SetTrigger("Crouch Start");
@@ -364,8 +370,9 @@ public class TotalControl : MonoBehaviour
         }
         else
         {
+            UpdateControlTypeUI("Full Body");
             if (idlecheck && (headY - leftFootY) < 1.2f && (headY - leftFootY) > 0.8f &&
-                /* Mathf.Abs(rightHandY - leftFootY) < 0.1f && Mathf.Abs(leftHandY - leftFootY) > 0.3f && */ !crouchTriggered)
+                Mathf.Abs(rightHandY - leftFootY) < 0.1f && Mathf.Abs(leftHandY - leftFootY) > 0.3f && !crouchTriggered)
             {
                 animator.SetTrigger("Crouch Start");
                 // cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
@@ -387,8 +394,9 @@ public class TotalControl : MonoBehaviour
 
 
         // Jump
-        if (JumpMethod == CustomMethod.Controller)
+        if (JumpMethod == Custom2Method.Controller)
         {
+            UpdateControlTypeUI("Controller");
             bool leftPressed = jumpAction.GetStateDown(leftInputSource);
             bool rightPressed = jumpAction.GetStateDown(rightInputSource);
 
@@ -418,8 +426,9 @@ public class TotalControl : MonoBehaviour
                 isJumping = false;
             }
         }
-        else if (JumpMethod == CustomMethod.HalfBody)
+        else if (JumpMethod == Custom2Method.HalfBody)
         {
+            UpdateControlTypeUI("Half Body");
             if (idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold)
             {
                 isJumping = true;
@@ -435,6 +444,7 @@ public class TotalControl : MonoBehaviour
         }
         else
         {
+            UpdateControlTypeUI("Full Body");
             if (!isJumpPrepared && idlecheck && leftHandY >= jumpThreshold && rightHandY >= jumpThreshold)
             {
                 animator.SetTrigger("Jump Prepare");
@@ -500,8 +510,9 @@ public class TotalControl : MonoBehaviour
             }
         }
 
-        if (CrawlMethod == CustomMethod.Controller)
+        if (CrawlMethod == Custom2Method.Controller)
         {
+            UpdateControlTypeUI("Controller");
             if (!isCrouching && crawlAction.GetStateDown(leftInputSource) && !isCrawling)
             {
                 Debug.Log("Crawl Left Triggered");
@@ -524,7 +535,7 @@ public class TotalControl : MonoBehaviour
             }
 
             //HBD & FBD crawl and walk
-            if (WalkMethod != CustomMethod.Controller)
+            if (WalkMethod != Custom2Method.Controller)
             {
                 if (activeHand != null && !isJumping && isCrawling)
                 {
@@ -552,8 +563,9 @@ public class TotalControl : MonoBehaviour
                 isCrawling = false;
             }
         }
-        else if (CrawlMethod == CustomMethod.HalfBody)
+        else if (CrawlMethod == Custom2Method.HalfBody)
         {
+            UpdateControlTypeUI("Half Body");
             bool inCrawlRange = leftHandY > crawlThreshold1 && leftHandY < crawlThreshold2 &&
                                 rightHandY > crawlThreshold1 && rightHandY < crawlThreshold2;
             if (idlecheck && inCrawlRange)
@@ -630,10 +642,11 @@ public class TotalControl : MonoBehaviour
         }
         else
         {
+            UpdateControlTypeUI("Full Body");
             // bool inCrawlRange = (headY - leftFootY) < 0.3f;
             // Debug.Log($"Crawl Check | LH-LF: {Mathf.Abs(leftHandY - leftFootY):F2}, RH-RF: {Mathf.Abs(rightHandY - rightFootY):F2}");
 
-            if (idlecheck && headY < 0.6f/* && leftHandY < 0.2f && rightHandY < 0.2f */)
+            if (idlecheck && headY < 0.6f && leftHandY < 0.2f && rightHandY < 0.2f)
             {
                 crawlConditionTimer += Time.deltaTime; // 조건 만족 중 → 타이머 증가
 
@@ -642,12 +655,12 @@ public class TotalControl : MonoBehaviour
                     StartCrawl();
                     animator.SetTrigger("Crawl Start");
                     isCrawling = true;
-                    cameraRigAligner.rootOffset = new Vector3(
-                        cameraRigAligner.rootOffset.x,
+                    cameraRigAlignerStudy2.rootOffset = new Vector3(
+                        cameraRigAlignerStudy2.rootOffset.x,
                         0f,
-                        cameraRigAligner.rootOffset.z
+                        cameraRigAlignerStudy2.rootOffset.z
                     );
-                    cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
+                    cameraRigAlignerStudy2.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
 
                     // 보호 타이머 시작 
                     // 애니메이션 재생동안 Crawl Exit Delta 계산하지 않도록
@@ -708,12 +721,12 @@ public class TotalControl : MonoBehaviour
                     StopCrawl();
                     animator.SetTrigger("Crawl End");
                     isCrawling = false;
-                    cameraRigAligner.rootOffset = new Vector3(
-                        cameraRigAligner.rootOffset.x,
+                    cameraRigAlignerStudy2.rootOffset = new Vector3(
+                        cameraRigAlignerStudy2.rootOffset.x,
                         1f,
-                        cameraRigAligner.rootOffset.z
+                        cameraRigAlignerStudy2.rootOffset.z
                     );
-                    cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
+                    cameraRigAlignerStudy2.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
                 }
             }
         }
@@ -745,5 +758,11 @@ public class TotalControl : MonoBehaviour
         yield return new WaitForSeconds(delay);
         isJumpingProtected = false;
         isJumping = false;
+    }
+
+    // Control Type UI Update
+    public void UpdateControlTypeUI(string type)
+    {
+        test2Manager.ControlTypeUI.text = type;
     }
 }

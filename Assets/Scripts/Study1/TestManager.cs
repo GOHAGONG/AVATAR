@@ -34,7 +34,6 @@ public class TestManager : MonoBehaviour
     public ActionType currentAction;
     public ControlType currentControl;
     
-    
     private List<ActionType> currentTrialSequence;
     private int currentTrialIndex = 0;
     public TestState currentState = TestState.WaitingForActionComplete;
@@ -52,7 +51,6 @@ public class TestManager : MonoBehaviour
 
     private void Start()
     {
-        UpdateControlTypeUI();
         currentTrialSequence = GenerateRandomizedSequence();
         currentTrialIndex = 0;
         StartNextTrial();
@@ -60,9 +58,6 @@ public class TestManager : MonoBehaviour
 
     private void Update()
     {
-        // ControlType Canvas 적용 
-        UpdateControlTypeUI();
-
         // Enter 누르면 NASA&FMS 설문 or 다음 동작 수행
         if (Input.GetKeyDown(KeyCode.Return))
         {
@@ -81,29 +76,6 @@ public class TestManager : MonoBehaviour
         {
             StartNextTrial();
         }
-    }
-    
-    private void UpdateControlTypeUI()
-    {
-        string displayText = "";
-
-        switch (currentControl)
-        {
-            case ControlType.KeyboardMouse:
-                displayText = "Keyboard + Mouse";
-                break;
-            case ControlType.Controller:
-                displayText = "Controller";
-                break;
-            case ControlType.HalfBody:
-                displayText = "Half Body";
-                break;
-            case ControlType.FullBody:
-                displayText = "Full Body";
-                break;
-        }
-
-        ControlTypeUI.text = $"Control Type: {displayText}";
     }
     
     private List<ActionType> GenerateRandomizedSequence()
@@ -170,7 +142,6 @@ public class TestManager : MonoBehaviour
                 break;
             case ActionType.Crawl:
                 CrawlUI.SetActive(true);
-                
                 // target object setting
                 Target.SetActive(true);
                 Target.GetComponent<Animation>().Play("crawlTarget");

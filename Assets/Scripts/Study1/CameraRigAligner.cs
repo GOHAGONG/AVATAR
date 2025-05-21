@@ -6,6 +6,7 @@ public class CameraRigAligner : MonoBehaviour
 {
     [Header("외부 스크립트 참조")]
     public TotalControl totalControl;
+    public TestManager testManager;
 
     [Header("CameraRig 및 VR 기기 참조")]
     public Transform cameraRigRoot;              // CameraRig 루트 (이동 대상)
@@ -39,11 +40,12 @@ public class CameraRigAligner : MonoBehaviour
 
     // Flag
     private bool isFullBody;
+    public Vector3 delta;
 
     void Start()
     {
         // HMD와 아바타 머리의 현재 위치 차이를 계산
-        Vector3 delta = avatarHead.position - hmdTransform.position;
+        delta = avatarHead.position - hmdTransform.position;
 
         // CameraRig 전체를 이동시켜 HMD 위치를 아바타 머리에 정렬
         // cameraRigRoot.position += delta;
@@ -58,25 +60,22 @@ public class CameraRigAligner : MonoBehaviour
     void Update()
     {
         // [1] CameraRig을 아바타 머리에 정렬
-        Vector3 delta = avatarHead.position - hmdTransform.position;
+        delta = avatarHead.position - hmdTransform.position;
 
         // delta.y 조건 분기 처리
-        if (totalControl != null)
+        if (totalControl != null && testManager != null)
         {
             isFullBody = totalControl.SelectedMethod == CurrentMethod.FullBody; 
             bool isCustomizedFullBody = false;
             if (totalControl != null && totalControl.SelectedMethod == CurrentMethod.Customize)
             {
-                if (totalControl.isJumping && totalControl.JumpMethod == CustomMethod.FullBody)
+                if (testManager.JumpUI.activeSelf && totalControl.JumpMethod == CustomMethod.FullBody)
                     isCustomizedFullBody = true;
 
-                if (totalControl.isCrouching && totalControl.CrouchMethod == CustomMethod.FullBody)
+                if (testManager.SitUI.activeSelf && totalControl.CrouchMethod == CustomMethod.FullBody)
                     isCustomizedFullBody = true;
 
-                if (totalControl.isCrawling && totalControl.CrawlMethod == CustomMethod.FullBody)
-                    isCustomizedFullBody = true;
-
-                if (totalControl.isWalking && totalControl.WalkMethod == CustomMethod.FullBody)
+                if (testManager.CrawlUI.activeSelf && totalControl.CrawlMethod == CustomMethod.FullBody)
                     isCustomizedFullBody = true;
             }
 
