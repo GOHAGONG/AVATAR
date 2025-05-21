@@ -313,12 +313,14 @@ public class TotalControlStudy2 : MonoBehaviour
             UpdateControlTypeUI("Controller");
             if (!isCrawling && crouchAction.GetStateDown(rightInputSource))
             {
+                DecreaseCollider();
                 animator.SetTrigger("Crouch Start");
                 isCrouching = true;
             }
 
             if ((crouchAction.GetStateUp(rightInputSource) && isCrouching))
             {
+                DefaultCollider();
                 animator.SetTrigger("Crouch End");
                 isCrouching = false;
             }
@@ -331,6 +333,7 @@ public class TotalControlStudy2 : MonoBehaviour
                 transform.localScale = newScale;
                 filpLeft = true;
 
+                DecreaseCollider();
                 animator.SetTrigger("Crouch Start");
                 isCrouching = true;
 
@@ -338,6 +341,7 @@ public class TotalControlStudy2 : MonoBehaviour
 
             if ((crouchAction.GetStateUp(leftInputSource) && isCrouching))
             {
+                DefaultCollider();
                 animator.SetTrigger("Crouch End");
                 isCrouching = false;
 
@@ -352,6 +356,7 @@ public class TotalControlStudy2 : MonoBehaviour
             UpdateControlTypeUI("Half Body");
             if (idlecheck && yDiff >= crouchThreshold && !crouchTriggered)
             {
+                DecreaseCollider();
                 animator.SetTrigger("Crouch Start");
                 isCrouching = true;
                 crouchTriggered = true;
@@ -360,6 +365,7 @@ public class TotalControlStudy2 : MonoBehaviour
 
             if (isCrouching && yDiff < crouchThreshold * 0.5f && crouchTriggered)
             {
+                DefaultCollider();
                 animator.SetTrigger("Crouch End");
                 isCrouching = false;
                 crouchTriggered = false;
@@ -374,6 +380,7 @@ public class TotalControlStudy2 : MonoBehaviour
             if (idlecheck && (headY - leftFootY) < 1.2f && (headY - leftFootY) > 0.8f &&
                 Mathf.Abs(rightHandY - leftFootY) < 0.1f && Mathf.Abs(leftHandY - leftFootY) > 0.3f && !crouchTriggered)
             {
+                DecreaseCollider();
                 animator.SetTrigger("Crouch Start");
                 // cameraRigAligner.rootOffset = new Vector3(0.0f, 0.0f, 0.0f);
                 isCrouching = true;
@@ -384,6 +391,7 @@ public class TotalControlStudy2 : MonoBehaviour
             if (isCrouching && ((headY - leftFootY) > 1.3f || (headY - leftFootY) < 0.7f) &&
                 /* (rightHandY - leftFootY) > crouchThreshold && */ crouchTriggered)
             {
+                DefaultCollider();
                 animator.SetTrigger("Crouch End");
                 // cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
                 isCrouching = false;
@@ -476,29 +484,27 @@ public class TotalControlStudy2 : MonoBehaviour
         //when Crawling, collider of banana man shoud shrink to crwaling size of man 
 
         // check can stand when crawling
-        canStand = Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
+        canStand = !Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
 
         // when starting crawling, collder 
-        void StartCrawl()
+        void DecreaseCollider()
         {
-            isCrawling = true;
             controller.height = crawlHeight;
             controller.center = crawlCenter;
         }
 
         // when stoping crawling == stand up
-        void StopCrawl()
+        void DefaultCollider()
         {
-            isCrawling = false;
             controller.height = originalHeight;
             controller.center = originalCenter;
         }
 
-        // function for checking there is ceiling upside
-        bool CanStandUp()
-        {
-            return !Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
-        }
+        // // function for checking there is ceiling upside
+        // bool CanStandUp()
+        // {
+        //     return !Physics.CheckSphere(headCheck.position, checkRadius, ceilingMask);
+        // }
 
         // For DEBUG, draw red circle checking there is ceiling object above head
         void OnDrawGizmosSelected()
@@ -516,23 +522,23 @@ public class TotalControlStudy2 : MonoBehaviour
             if (!isCrouching && crawlAction.GetStateDown(leftInputSource) && !isCrawling)
             {
                 Debug.Log("Crawl Left Triggered");
-                StartCrawl();
+                DecreaseCollider();
                 animator.SetTrigger("Crawl Start");
                 isCrawling = true;
 
                 if (activeHand == leftInputSource)
                     activeHand = rightInputSource;
             }
-            if (!isCrouching && crawlAction.GetStateDown(rightInputSource))
-            {
-                Debug.Log("Crawl Right Triggered");
-                StartCrawl();
-                animator.SetTrigger("Crawl Start");
-                isCrawling = true;
+            // if (!isCrouching && crawlAction.GetStateDown(rightInputSource) && !isCrawling)
+            // {
+            //     Debug.Log("Crawl Right Triggered");
+            //     DecreaseCollider();
+            //     animator.SetTrigger("Crawl Start");
+            //     isCrawling = true;
 
-                if (activeHand == rightInputSource)
-                    activeHand = leftInputSource;
-            }
+            //     if (activeHand == rightInputSource)
+            //         activeHand = leftInputSource;
+            // }
 
             //HBD & FBD crawl and walk
             if (WalkMethod != Custom2Method.Controller)
@@ -558,9 +564,12 @@ public class TotalControlStudy2 : MonoBehaviour
             if ((crawlAction.GetStateUp(leftInputSource) && isCrawling) ||
                 (crawlAction.GetStateUp(rightInputSource) && isCrawling))
             {
-                StopCrawl();
-                animator.SetTrigger("Crawl End");
-                isCrawling = false;
+                if (canStand)
+                {
+                    DefaultCollider();
+                    animator.SetTrigger("Crawl End");
+                    isCrawling = false;
+                }
             }
         }
         else if (CrawlMethod == Custom2Method.HalfBody)
@@ -575,7 +584,7 @@ public class TotalControlStudy2 : MonoBehaviour
                 if (crawlConditionTimer >= crawlHoldTimeRequired && !isCrawling)
                 {
                     //Debug.Log("Crawl Triggered after Hold");
-                    StartCrawl();
+                    DecreaseCollider();
                     animator.SetTrigger("Crawl Start");
                     isCrawling = true;
 
@@ -633,10 +642,12 @@ public class TotalControlStudy2 : MonoBehaviour
 
                 if (leftDelta > crawlExitDelta && rightDelta > crawlExitDelta)
                 {
-                    //Debug.Log("Crawl End triggered by movement delta");
-                    StopCrawl();
-                    animator.SetTrigger("Crawl End");
-                    isCrawling = false;
+                    if (canStand)
+                    {
+                        DefaultCollider();
+                        animator.SetTrigger("Crawl End");
+                        isCrawling = false;
+                    }
                 }
             }
         }
@@ -652,7 +663,7 @@ public class TotalControlStudy2 : MonoBehaviour
 
                 if (crawlConditionTimer >= crawlHoldTimeRequired && !isCrawling)
                 {
-                    StartCrawl();
+                    DecreaseCollider();
                     animator.SetTrigger("Crawl Start");
                     isCrawling = true;
                     cameraRigAlignerStudy2.rootOffset = new Vector3(
@@ -715,10 +726,10 @@ public class TotalControlStudy2 : MonoBehaviour
 
                 // Debug.Log("left Delta: " + leftDelta);
 
-                if (headY > 0.5f)
+                if (headY > 0.5f && canStand)
                 {
                     //Debug.Log("Crawl End triggered by movement delta");
-                    StopCrawl();
+                    DefaultCollider();
                     animator.SetTrigger("Crawl End");
                     isCrawling = false;
                     cameraRigAlignerStudy2.rootOffset = new Vector3(
