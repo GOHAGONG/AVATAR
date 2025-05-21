@@ -27,7 +27,6 @@ public class Test2Manager : MonoBehaviour
     
     private List<ActionType> currentTrialSequence;
     private int currentTrialIndex = 0;
-    public GameObject Target;
 
     [Header("UI")]
     public TMP_Text ControlTypeUI;
@@ -38,6 +37,13 @@ public class Test2Manager : MonoBehaviour
 
     private void Start()
     {
+        currentTrialSequence = new List<ActionType>
+        {
+            ActionType.WalkRun,
+            ActionType.Crawl,
+            ActionType.CrouchJump
+        };
+        
         currentTrialIndex = 0;
         StartNextTrial();
     }
