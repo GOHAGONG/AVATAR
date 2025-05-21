@@ -2932,26 +2932,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b411acb38d9d1224e92b7e331b7d1d77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  totalControlStudy2: {fileID: 0}
-  test2Manager: {fileID: 0}
-  cameraRigRoot: {fileID: 0}
-  hmdTransform: {fileID: 0}
-  leftControllerTransform: {fileID: 0}
-  rightControllerTransform: {fileID: 0}
-  leftFootTrackerTransform: {fileID: 0}
-  rightFootTrackerTransform: {fileID: 0}
-  avatarHead: {fileID: 0}
-  avatarLeftHand: {fileID: 0}
-  avatarRightHand: {fileID: 0}
-  avatarLeftFoot: {fileID: 0}
-  avatarRightFoot: {fileID: 0}
-  avatarRoot: {fileID: 0}
-  rootOffset: {x: 0, y: 0, z: 0}
+  totalControlStudy2: {fileID: 2007373448}
+  test2Manager: {fileID: 1303198815}
+  cameraRigRoot: {fileID: 483308332}
+  hmdTransform: {fileID: 583485285}
+  leftControllerTransform: {fileID: 847020296}
+  rightControllerTransform: {fileID: 2090365876}
+  leftFootTrackerTransform: {fileID: 632437017}
+  rightFootTrackerTransform: {fileID: 1108629771}
+  avatarHead: {fileID: 1793694638}
+  avatarLeftHand: {fileID: 2007373453}
+  avatarRightHand: {fileID: 2007373452}
+  avatarLeftFoot: {fileID: 2007373451}
+  avatarRightFoot: {fileID: 2007373450}
+  avatarRoot: {fileID: 2007373449}
+  rootOffset: {x: 0, y: 1, z: 0}
   leftHandOffset: {x: 0, y: 0, z: 0}
   rightHandOffset: {x: 0, y: 0, z: 0}
   rightKneeOffset: {x: 0, y: 0, z: 0}
-  leftFootOffset: {x: 0, y: 0, z: 0}
-  rightFootOffset: {x: 0, y: 0, z: 0}
+  leftFootOffset: {x: 0, y: -0.1, z: 0}
+  rightFootOffset: {x: 0, y: -0.1, z: 0}
   delta: {x: 0, y: 0, z: 0}
 --- !u!114 &2007373448
 MonoBehaviour:
@@ -2970,37 +2970,37 @@ MonoBehaviour:
   CrouchMethod: 0
   JumpMethod: 0
   CrawlMethod: 0
-  groundCheck: {fileID: 0}
+  groundCheck: {fileID: 2007373454}
   groundDistance: 0.1
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
-  headCheck: {fileID: 0}
+    m_Bits: 64
+  headCheck: {fileID: 1793694638}
   checkRadius: 1.2
   ceilingMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1024
   canStand: 1
-  animator: {fileID: 0}
+  animator: {fileID: 2007373455}
   trackpadAxisAction:
-    actionPath: 
+    actionPath: /actions/avatar/in/trackpadAction
     needsReinit: 0
   jumpAction:
-    actionPath: 
+    actionPath: /actions/avatar/in/Jump
     needsReinit: 0
   crouchAction:
-    actionPath: 
+    actionPath: /actions/avatar/in/Crouch
     needsReinit: 0
   crawlAction:
-    actionPath: 
+    actionPath: /actions/avatar/in/Crawl
     needsReinit: 0
   leftInputSource: 1
   rightInputSource: 2
-  headPos: {fileID: 0}
-  leftHandPose: {fileID: 0}
-  rightHandPose: {fileID: 0}
-  leftFootPose: {fileID: 0}
-  rightFootPose: {fileID: 0}
+  headPos: {fileID: 1793694638}
+  leftHandPose: {fileID: 1190733125}
+  rightHandPose: {fileID: 1190733124}
+  leftFootPose: {fileID: 1190733123}
+  rightFootPose: {fileID: 1190733122}
   originalHeight: 0
   crawlHeight: 1
   crawlCenter: {x: 0, y: 0.5, z: 0}
@@ -3012,23 +3012,58 @@ MonoBehaviour:
   isJumping: 0
   isCrawling: 0
   filpLeft: 0
-  crouchThreshold: 0
-  jumpThreshold: 0
-  jumpExitThreshold: 0
-  crawlThreshold1: 0
-  crawlThreshold2: 0
+  crouchThreshold: 0.3
+  jumpThreshold: 1.75
+  jumpExitThreshold: 1.35
+  crawlThreshold1: 1.2
+  crawlThreshold2: 1.5
   crawlThreshold3: 0
   crawlThreshold4: 0
-  walkThreshold: 0
+  walkThreshold: 1.15
   isWalkThreshold: 0
-  runThreshold: 0
-  cameraRigAlignerStudy2: {fileID: 0}
-  test2Manager: {fileID: 0}
+  runThreshold: 1
+  cameraRigAlignerStudy2: {fileID: 2007373447}
+  test2Manager: {fileID: 1303198815}
   moveSpeed: 0
   jumpForce: 0
   crawlHoldTimeRequired: 0.5
-  crawlExitDelta: 1.3
+  crawlExitDelta: 0.3
   isJumpingProtected: 0
+--- !u!4 &2007373449 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2358007089390050310, guid: 39d051b0e4184a046917067c6c9fa37f, type: 3}
+  m_PrefabInstance: {fileID: 2007373445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2007373450 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7014459101389952279, guid: 39d051b0e4184a046917067c6c9fa37f, type: 3}
+  m_PrefabInstance: {fileID: 2007373445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2007373451 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4691538829353138046, guid: 39d051b0e4184a046917067c6c9fa37f, type: 3}
+  m_PrefabInstance: {fileID: 2007373445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2007373452 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5766740674658987855, guid: 39d051b0e4184a046917067c6c9fa37f, type: 3}
+  m_PrefabInstance: {fileID: 2007373445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2007373453 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5023940481438346241, guid: 39d051b0e4184a046917067c6c9fa37f, type: 3}
+  m_PrefabInstance: {fileID: 2007373445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2007373454 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 185950192820403382, guid: 39d051b0e4184a046917067c6c9fa37f, type: 3}
+  m_PrefabInstance: {fileID: 2007373445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2007373455 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 4772816443581232433, guid: 39d051b0e4184a046917067c6c9fa37f, type: 3}
+  m_PrefabInstance: {fileID: 2007373445}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2013663897
 GameObject:
   m_ObjectHideFlags: 0
