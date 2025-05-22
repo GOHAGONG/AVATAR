@@ -371,7 +371,7 @@ public class TotalControl : MonoBehaviour
         else
         {
             UpdateControlTypeUI("Full Body");
-            if (idlecheck && (headY - leftFootY) < 1.2f && (headY - leftFootY) > 0.8f &&
+            if (idlecheck && /* (headY - leftFootY) < 1.2f && (headY - leftFootY) > 0.8f && */
                 Mathf.Abs(rightHandY - leftFootY) < 0.1f && Mathf.Abs(leftHandY - leftFootY) > 0.3f && !crouchTriggered)
             {
                 animator.SetTrigger("Crouch Start");
@@ -381,8 +381,8 @@ public class TotalControl : MonoBehaviour
                 Debug.Log("Crouch Start");
             }
 
-            if (isCrouching && ((headY - leftFootY) > 1.3f || (headY - leftFootY) < 0.7f) &&
-                /* (rightHandY - leftFootY) > crouchThreshold && */ crouchTriggered)
+            if (isCrouching && /* ((headY - leftFootY) > 1.3f || (headY - leftFootY) < 0.7f) && */
+                 (rightHandY - leftFootY) > crouchThreshold && crouchTriggered)
             {
                 animator.SetTrigger("Crouch End");
                 // cameraRigAligner.rootOffset = new Vector3(0.0f, 1.0f, 0.0f);
@@ -451,7 +451,7 @@ public class TotalControl : MonoBehaviour
                 isJumpPrepared = true;
             }
 
-            if (isJumpPrepared && leftFootY > 0.3f && rightFootY > 0.3f)
+            if (isJumpPrepared && leftFootY > 0.15f && rightFootY > 0.15f)
             {
                 isJumpPrepared = false;
                 animator.SetTrigger("Jump Execute");
@@ -537,22 +537,26 @@ public class TotalControl : MonoBehaviour
             //HBD & FBD crawl and walk
             if (WalkMethod != CustomMethod.Controller)
             {
-                if (activeHand != null && !isJumping && isCrawling)
+                if (isCrawling)
                 {
-                    // 이동벡터 계산
-                    Vector3 move = transform.right * activeInput.x + transform.forward * activeInput.y;
+                    if (activeHand != null && !isJumping && isCrawling)
+                    {
+                        // 이동벡터 계산
+                        Vector3 move = transform.right * activeInput.x + transform.forward * activeInput.y;
 
-                    // 이동 적용
-                    controller.Move(move * moveSpeed * Time.deltaTime);
+                        // 이동 적용
+                        controller.Move(move * moveSpeed * Time.deltaTime);
 
-                    isWalking = (activeInput.y > 0.2f);
-                    isRunning = (activeInput.y >= 0.6f);
+                        isWalking = (activeInput.y > 0.2f);
+                        isRunning = (activeInput.y >= 0.6f);
+                    }
+                    else
+                    {
+                        isWalking = false;
+                        isRunning = false;
+                    }
                 }
-                else
-                {
-                    isWalking = false;
-                    isRunning = false;
-                }
+                
             }
 
             if ((crawlAction.GetStateUp(leftInputSource) && isCrawling) ||
@@ -646,7 +650,7 @@ public class TotalControl : MonoBehaviour
             // bool inCrawlRange = (headY - leftFootY) < 0.3f;
             // Debug.Log($"Crawl Check | LH-LF: {Mathf.Abs(leftHandY - leftFootY):F2}, RH-RF: {Mathf.Abs(rightHandY - rightFootY):F2}");
 
-            if (idlecheck && headY < 0.6f && leftHandY < 0.2f && rightHandY < 0.2f)
+            if (idlecheck && /* headY < 0.6f && */ leftHandY < 0.2f && rightHandY < 0.2f)
             {
                 crawlConditionTimer += Time.deltaTime; // 조건 만족 중 → 타이머 증가
 
@@ -715,7 +719,7 @@ public class TotalControl : MonoBehaviour
 
                 // Debug.Log("left Delta: " + leftDelta);
 
-                if (headY > 0.5f)
+                if (/* headY > 0.5f */ leftHandY > 0.5f && rightHandY > 0.5f)
                 {
                     //Debug.Log("Crawl End triggered by movement delta");
                     StopCrawl();
