@@ -1,12 +1,19 @@
 using UnityEngine;
 using System.Collections;
-
+using TMPro;
 public class Obstacle : MonoBehaviour
 {
     private Vector3 targetPos;
     private float moveSpeed;
     private ObstaclePool pool;
     private bool isHit = false;
+    public TMP_Text ouchUI;
+
+    void Start()
+    {
+        ouchUI = GameObject.FindWithTag("OuchUI").GetComponent<TMP_Text>();
+        Debug.Log(ouchUI);
+    }
 
     public void Setup(ObstaclePool pool, Vector3 targetPos, float moveSpeed)
     {
@@ -31,11 +38,13 @@ public class Obstacle : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log($"[Obstacle] Triggered with: {other.gameObject.name}, Tag: {other.tag}");
         if (isHit) return;
 
         if (other.CompareTag("Player"))
         {
             isHit = true;
+            // StartCoroutine(OuchUIOn());
             StartCoroutine(BlinkAndReturn());
         }
     }
@@ -45,6 +54,13 @@ public class Obstacle : MonoBehaviour
     {
         Renderer rend = GetComponent<Renderer>();
         if (rend == null) yield break;
+
+        if (ouchUI != null)
+        {
+            ouchUI.text = "아야!";
+            yield return new WaitForSeconds(1.0f);
+            ouchUI.text = "";
+        }
 
         for (int i = 0; i < 5; i++)
         {
@@ -56,4 +72,14 @@ public class Obstacle : MonoBehaviour
 
         pool.ReturnToPool(gameObject);
     }
+
+    // IEnumerator OuchUIOn()
+    // {
+    //     if (ouchUI != null)
+    //     {
+    //         ouchUI.text = "아야!";
+    //         yield return new WaitForSeconds(1.5f);
+    //         ouchUI.text = "ㅇㅇ";
+    //     }
+    // }
 }

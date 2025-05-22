@@ -6,7 +6,7 @@ public class ObstacleSpawner : MonoBehaviour
     public Transform spawnPoint;
     public Transform targetPoint;
     public Transform player;
-    public float stopDistance = 1f; // ÇÃ·¹ÀÌ¾î°¡ spawn¿¡ µµ´ÞÇÏ¸é ¸ØÃã
+    public float stopDistance = 1f; // ï¿½Ã·ï¿½ï¿½Ì¾î°¡ spawnï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½
     public float spawnInterval = 2f;
     public float moveSpeed = 5f;
 
@@ -17,11 +17,11 @@ public class ObstacleSpawner : MonoBehaviour
     {
         if (spawningStopped) return;
 
-        // ÇÃ·¹ÀÌ¾î°¡ spawnPoint¿¡ °¡±îÀÌ °¡¸é ½ºÆù Áß´Ü
+        // ï¿½Ã·ï¿½ï¿½Ì¾î°¡ spawnPointï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß´ï¿½
         if (Vector3.Distance(player.position, spawnPoint.position) < stopDistance)
         {
             spawningStopped = true;
-            Debug.Log("ÇÃ·¹ÀÌ¾î°¡ SpawnPoint¿¡ µµ´ÞÇß½À´Ï´Ù. Àå¾Ö¹° ½ºÆù Áß´Ü!");
+            Debug.Log("ï¿½Ã·ï¿½ï¿½Ì¾î°¡ SpawnPointï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ï´ï¿½. ï¿½ï¿½Ö¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß´ï¿½!");
             return;
         }
 
@@ -37,7 +37,7 @@ public class ObstacleSpawner : MonoBehaviour
     {
         if (spawnPoint == null || targetPoint == null)
         {
-            Debug.LogWarning("SpawnPoint ¶Ç´Â TargetPoint°¡ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogWarning("SpawnPoint ï¿½Ç´ï¿½ TargetPointï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò½ï¿½ï¿½Ï´ï¿½.");
             return;
         }
 
