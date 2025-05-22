@@ -3,14 +3,27 @@ using UnityEngine;
 
 public class ObstaclePool : MonoBehaviour
 {
-    public GameObject[] obstaclePrefabs; // ���� ������
+    public GameObject[] obstaclePrefabs; // ���� ������
     public int poolSize = 5;
 
     private Queue<GameObject> pool = new Queue<GameObject>();
 
     void Start()
     {
-        for (int i = 0; i < poolSize; i++)
+        if (obstaclePrefabs.Length == 0) return;
+
+        int count = Mathf.Min(poolSize, obstaclePrefabs.Length);
+
+        // 최소 1개씩 넣되, poolSize보다 작으면 일부만 넣기
+        for (int i = 0; i < count; i++)
+        {
+            GameObject obj = Instantiate(obstaclePrefabs[i]);
+            obj.SetActive(false);
+            pool.Enqueue(obj);
+        }
+
+        // 남은 수만큼 랜덤 추가
+        for (int i = count; i < poolSize; i++)
         {
             GameObject prefab = GetRandomPrefab();
             GameObject obj = Instantiate(prefab);
@@ -18,6 +31,7 @@ public class ObstaclePool : MonoBehaviour
             pool.Enqueue(obj);
         }
     }
+
 
     public GameObject GetFromPool()
     {

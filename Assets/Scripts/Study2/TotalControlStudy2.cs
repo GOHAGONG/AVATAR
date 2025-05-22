@@ -42,6 +42,10 @@ public class TotalControlStudy2 : MonoBehaviour
     public LayerMask ceilingMask;
     public bool canStand = true;
 
+    [Header("Wall Check")]
+    private CapsuleCollider capsuleCollider;
+    private float originalCapsuleHeight;
+    private Vector3 originalCapsuleCenter;
 
     [Header("Animation")]
     public Animator animator;
@@ -124,9 +128,16 @@ public class TotalControlStudy2 : MonoBehaviour
         prevLeftHandPos = leftHandPose.transform.position;
         prevRightHandPos = rightHandPose.transform.position;
 
-        // for crawl collider control
+        // for decrease collider
         originalHeight = controller.height;
         originalCenter = controller.center;
+
+        capsuleCollider = GetComponent<CapsuleCollider>();
+        if (capsuleCollider != null)
+        {
+            originalCapsuleHeight = capsuleCollider.height;
+            originalCapsuleCenter = capsuleCollider.center;
+        }       
     }
 
     // Update is called once per frame
@@ -491,6 +502,12 @@ public class TotalControlStudy2 : MonoBehaviour
         {
             controller.height = crawlHeight;
             controller.center = crawlCenter;
+
+            if (capsuleCollider != null)
+            {
+                capsuleCollider.height = crawlHeight;
+                capsuleCollider.center = crawlCenter;
+            }
         }
 
         // when stoping crawling == stand up
@@ -498,7 +515,14 @@ public class TotalControlStudy2 : MonoBehaviour
         {
             controller.height = originalHeight;
             controller.center = originalCenter;
+
+            if (capsuleCollider != null)
+            {
+                capsuleCollider.height = originalCapsuleHeight;
+                capsuleCollider.center = originalCapsuleCenter;
+            }
         }
+
 
         // // function for checking there is ceiling upside
         // bool CanStandUp()
