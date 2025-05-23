@@ -88,10 +88,9 @@ public class TotalControl : MonoBehaviour
     private bool crouchTriggered = false;
     public float jumpThreshold;
     public float jumpExitThreshold;
+    public float jumpExecuteThreshold;
     public float crawlThreshold1;
     public float crawlThreshold2;
-    public float crawlThreshold3;
-    public float crawlThreshold4;
     public float walkThreshold;
     public bool isWalkThreshold;
     public float runThreshold;
@@ -451,7 +450,7 @@ public class TotalControl : MonoBehaviour
                 isJumpPrepared = true;
             }
 
-            if (isJumpPrepared && leftFootY > 0.15f && rightFootY > 0.15f)
+            if (isJumpPrepared && leftFootY > jumpExecuteThreshold && rightFootY > jumpExecuteThreshold)
             {
                 isJumpPrepared = false;
                 animator.SetTrigger("Jump Execute");
@@ -622,12 +621,6 @@ public class TotalControl : MonoBehaviour
                 isWalking = (isCrawling && walkTimer > 0f);
             }
 
-            // if (isCrawling && ((leftY < crawlThreshold3 && rightY < crawlThreshold3) || (leftY > crawlThreshold4 && rightY > crawlThreshold4)) )
-            // {
-            //     animator.SetTrigger("Crawl End");
-            //     isCrawling = false;
-            // }
-
             if (isCrawling && !isCrawlingProtected)
             {
                 float leftDelta = Mathf.Abs(leftHandY - crawlStartLeftY);
@@ -705,12 +698,6 @@ public class TotalControl : MonoBehaviour
                 // isRunning = runTimer > 0f;
                 isWalking = (isCrawling && walkTimer > 0f);
             }
-
-            // if (isCrawling && ((leftY < crawlThreshold3 && rightY < crawlThreshold3) || (leftY > crawlThreshold4 && rightY > crawlThreshold4)) )
-            // {
-            //     animator.SetTrigger("Crawl End");
-            //     isCrawling = false;
-            // }
 
             if (isCrawling && !isCrawlingProtected)
             {
